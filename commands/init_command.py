@@ -1,6 +1,6 @@
 from util.file_util import FileUtil
 from .command import Command
-from typing import List
+# from typing import List
 import os
 import traceback
 
@@ -36,15 +36,16 @@ class InitCommand(Command):
             # 6 create index file
             index_file = "index"
             index_file_path = os.path.join(storage_full_path, index_file)
-            FileUtil.write_lines_to_file(index_file_path, all_files)
+            FileUtil.write_lines_to_file(index_file_path, "")
+            # FileUtil.write_lines_to_file(index_file_path, all_files)
             # 7 for all file in list of files in working dir
             #       add file to active / default / current branch
             objects_dir = "objects"
             objects_dir_path = os.path.join(storage_full_path, objects_dir)
             FileUtil.create_dir_if_not_exist(objects_dir_path)
-            files_list = FileUtil.list_dir_non_recursive_with_exclude(work_dir, storage_dir)
-            for f in files_list:
-                FileUtil.copy_to_directory(f, objects_dir_path)
+            # files_list = FileUtil.list_dir_non_recursive_with_exclude(work_dir, storage_dir)
+            # for f in files_list:
+            #     FileUtil.copy_to_directory(f, objects_dir_path)
 
         except Exception as e:
             print(f"init failed. {e}")

@@ -2,6 +2,7 @@ from commands.command import Command
 from commands.init_command import InitCommand
 from commands.status_command import StatusCommand
 from commands.commit_command import CommitCommand
+from commands.add import AddCommand
 from typing import List
 
 
@@ -12,5 +13,7 @@ class Dispatcher:
             return InitCommand(tokens[1:])
         elif tokens[0] == "status":
             return StatusCommand(tokens[1:])
+        elif tokens[0] == "add":
+            return AddCommand(tokens[1:])
         else:
             return CommitCommand(tokens[1:])

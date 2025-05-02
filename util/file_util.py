@@ -1,13 +1,40 @@
 import os
 from typing import List
 import shutil
+import hashlib
+
+# from commands.add import IndexEntry
+
+
+class IndexEntry:
+    def __init__(self, path: str, sha1: str, mod_time: int, size: int):
+        self.path = path
+        self.sha1 = sha1
+        self.mod_time = mod_time
+        self.size = size
+
+    def __str__(self):
+        return f"{self.path}|{self.sha1}|{self.mod_time}|{self.size}"
+
+    @classmethod
+    def from_string(cls, line: str):
+        path, sha1, mod_time_str, size_str = line.split("|")
+        return cls(path, sha1, int(mod_time_str), int(size_str))
 
 
 class FileUtil:
 
+    # @staticmethod
+    # def is_dir_exist(path) -> bool:
+    #     return 1
+
     @staticmethod
-    def is_dir_exist(path) -> bool:
-        return 1
+    def is_file_exist(file_path) -> bool:
+        return os.path.isfile(file_path)
+
+    @staticmethod
+    def is_dir_exist(file_path) -> bool:
+        return os.path.isdir(file_path)
 
     @staticmethod
     def create_dir_if_not_exist(dir_path) -> bool:
@@ -50,6 +77,25 @@ class FileUtil:
                 f.write(line + "\n")
 
     @staticmethod
+    def update_index_file(file_path: str, lines: list[IndexEntry]) -> None:
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        with open(file_path, "w") as f:
+            for line in lines:
+                f.write(str(line) + "\n")
+                # print(f">{line}")
+
+    @staticmethod
+    def add_file_to_objects(orig_file: str, target_dir: str) -> None:
+        if not os.path.isdir(target_dir):
+            os.makedirs(target_dir)
+        shutil.copy2(orig_file, target_dir)
+
+    @staticmethod
+    def list_indexed_files(path) -> List[str]:
+        with open(path, "r") as f:
+            return [line.rstrip("\n") for line in f]
+
+    @staticmethod
     def copy_to_directory(orig_file: str, target_dir: str) -> None:
         if not os.path.exists(orig_file):
             raise FileNotFoundError(f"Source path does not exist: {orig_file}")
@@ -66,12 +112,41 @@ class FileUtil:
 
     @staticmethod
     def list_dir_non_recursive_with_exclude(path: str, exc: str) -> list[str]:
-        return [
-            os.path.join(path, entry)
-            for entry in os.listdir(path)
-            if entry != exc
-        ]
-    
+        return [os.path.join(path, entry) for entry in os.listdir(path) if entry != exc]
+
     @staticmethod
     def list_dir_non_recursive(path: str) -> list[str]:
         return [entry for entry in os.listdir(path)]
+
+    @staticmethod
+    def read_lines_from_file(file_path: str) -> list[str]:
+        with open(file_path, "r") as f:
+            return [line.rstrip("\n") for line in f]
+
+    @staticmethod
+    def sha1_of_file(file_path: str) -> str:
+        sha1 = hashlib.sha1()
+        with open(file_path, "rb") as f:
+            while chunk := f.read(8192):  # Read in 8 KB chunks
+                sha1.update(chunk)
+        return sha1.hexdigest()
+
+    @staticmethod
+    def parse_index_file_lines(file_path: str) -> list[IndexEntry]:
+        ts_list = []
+        with open(file_path, "r") as f:
+            for line in f:
+                line = line.strip()
+                if line:  # skip empty lines
+                    # tokens = line.split("|")
+                    ts_list.append(IndexEntry.from_string(line))
+        return ts_list
+
+    @staticmethod
+    def build_index_entry(file_path: str) -> list[IndexEntry]:
+        path = file_path
+        sha1 = FileUtil.sha1_of_file(file_path)
+        file_stat = os.stat(file_path)
+        mod_time = file_stat.st_mtime_ns
+        size = file_stat.st_size
+        return IndexEntry(path, sha1, mod_time, size)
