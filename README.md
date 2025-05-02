@@ -48,3 +48,8 @@ commands
         
 6. checkout <branch> <>
 7. 
+
+next:
+    commit
+    reset --HEAD / unstage / untrack 
+    /restore? --staged <file> /revert?
