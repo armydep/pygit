@@ -23,38 +23,51 @@ class AddCommand(Command):
                 print("The work dir is not a git repository. missing .git directory")
                 return
 
-            if not FileUtil.is_file_exist(file_path):
-                print(f"Specified file does not exists {file_path}")
-                return
 
-            target_index_entry = FileUtil.build_index_entry(file_path)
-            print(f"Index entry:{target_index_entry}")
             objects_dir = "objects"
             index_file = "index"
             index_file_path = os.path.join(storage_full_path, index_file)
             index_entries = FileUtil.parse_index_file_lines(index_file_path)
 
-            index_entry = self._find_index_entry_by_path(index_entries, target_index_entry.path)
+            # if not FileUtil.is_file_exist(file_path):
+            #     print(f"Specified file does not exists {file_path}. Will be removed from index if it were there")
+            #     return
+            
+            is_target_exist_in_work_dir = FileUtil.is_file_exist(file_path)
+
+            index_entry = self._find_index_entry_by_path(index_entries, file_path)
             if index_entry:
-                print("Yes it is")
-                # todo: replace by target.equals to index
-                if target_index_entry.sha1 == index_entry.sha1 and target_index_entry.size == index_entry.size:
-                    # (target_index_entry.mod_time == index_entry.mod_time) or
-                    print("The file is already staged. No changes")
+                print("The file required to add to tracking is found in index (will be added/removed depend on modified or not in work_dir)")
+                if is_target_exist_in_work_dir:
+                    target_index_entry = FileUtil.build_index_entry(file_path)
+                    print(f"Target Index entry:{target_index_entry}")
+                    # todo: replace by target.equals to index
+                    if target_index_entry.sha1 == index_entry.sha1 and target_index_entry.size == index_entry.size:
+                        print("The file is already staged and wasnt changed since that moment. No add required")
+                    else:
+                        print("Exist in stage but modified. Replacing")
+                        index_entry.size = target_index_entry.size
+                        index_entry.sha1 = target_index_entry.sha1
+                        index_entry.mod_time = target_index_entry.mod_time
+                        FileUtil.update_index_file(index_file_path, index_entries)
+                        path_in_objects = os.path.join(storage_full_path, objects_dir, target_file)
+                        FileUtil.add_file_to_objects(file_path, os.path.dirname(path_in_objects))
                 else:
-                    print("Exist in stage but modified. Replacing")
-                    index_entry.size = target_index_entry.size
-                    index_entry.sha1 = target_index_entry.sha1
-                    index_entry.mod_time = target_index_entry.mod_time
+                    print("The file was in index and now removed from the workd_dir. Removing from index")
+                    index_entries = self._remove_entry_by_path(index_entries, file_path)
+                    FileUtil.update_index_file(index_file_path, index_entries)
+                    path_in_objects = os.path.join(storage_full_path, objects_dir, target_file)
+                    os.remove(path_in_objects)
+
+            else:
+                if is_target_exist_in_work_dir:
+                    print("The file required to add to tracking is in work_dir and NOT found in index. Adding to index")
+                    index_entries.append(target_index_entry)
                     FileUtil.update_index_file(index_file_path, index_entries)
                     path_in_objects = os.path.join(storage_full_path, objects_dir, target_file)
                     FileUtil.add_file_to_objects(file_path, os.path.dirname(path_in_objects))
-            else:
-                print("no it is not")
-                index_entries.append(target_index_entry)
-                FileUtil.update_index_file(index_file_path, index_entries)
-                path_in_objects = os.path.join(storage_full_path, objects_dir, target_file)
-                FileUtil.add_file_to_objects(file_path, os.path.dirname(path_in_objects))
+                else:
+                    print("The target file is not in work_dir, NOR in index. Nothing to add")
 
         except Exception as e:
             print(f"add failed. {e}")
@@ -71,3 +84,8 @@ class AddCommand(Command):
             if entry.path == target_path:
                 return entry
         return None  # Not found
+
+    # todo: move into IndexEntry
+    @staticmethod
+    def _remove_entry_by_path(entries: list[IndexEntry], path: str) -> list[IndexEntry]:
+        return [e for e in entries if e.path != path]
