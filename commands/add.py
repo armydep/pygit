@@ -37,9 +37,9 @@ class AddCommand(Command):
             index_entry = self._find_index_entry_by_path(index_entries, target_index_entry.path)
             if index_entry:
                 print("Yes it is")
-                if (target_index_entry.mod_time == index_entry.mod_time) or (
-                    target_index_entry.sha1 == index_entry.sha1 and target_index_entry.size == index_entry.size
-                ):
+                # todo: replace by target.equals to index
+                if target_index_entry.sha1 == index_entry.sha1 and target_index_entry.size == index_entry.size:
+                    # (target_index_entry.mod_time == index_entry.mod_time) or
                     print("The file is already staged. No changes")
                 else:
                     print("Exist in stage but modified. Replacing")
@@ -47,13 +47,13 @@ class AddCommand(Command):
                     index_entry.sha1 = target_index_entry.sha1
                     index_entry.mod_time = target_index_entry.mod_time
                     FileUtil.update_index_file(index_file_path, index_entries)
-                    path_in_objects = os.path.join(storage_full_path, objects_dir, target_file)                
-                    FileUtil.add_file_to_objects(file_path, os.path.dirname(path_in_objects))                    
+                    path_in_objects = os.path.join(storage_full_path, objects_dir, target_file)
+                    FileUtil.add_file_to_objects(file_path, os.path.dirname(path_in_objects))
             else:
                 print("no it is not")
                 index_entries.append(target_index_entry)
                 FileUtil.update_index_file(index_file_path, index_entries)
-                path_in_objects = os.path.join(storage_full_path, objects_dir, target_file)                
+                path_in_objects = os.path.join(storage_full_path, objects_dir, target_file)
                 FileUtil.add_file_to_objects(file_path, os.path.dirname(path_in_objects))
 
         except Exception as e:
@@ -61,9 +61,9 @@ class AddCommand(Command):
             traceback.print_exc()
             return -1
 
-    @staticmethod
-    def _index_contains_entry(index_entries: list[IndexEntry], entry: IndexEntry) -> bool:
-        return any(itent.path and itent.path == entry.path for itent in index_entries)
+    # @staticmethod
+    # def _index_contains_entry(index_entries: list[IndexEntry], entry: IndexEntry) -> bool:
+    #     return any(itent.path and itent.path == entry.path for itent in index_entries)
 
     @staticmethod
     def _find_index_entry_by_path(entries: list[IndexEntry], target_path: str) -> Optional[IndexEntry]:

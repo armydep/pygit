@@ -53,3 +53,15 @@ next:
     commit
     reset --HEAD / unstage / untrack 
     /restore? --staged <file> /revert?
+
+next:
+    should commit command check and say if there are unstaged changes?
+    update git status command 
+    add comment to commit    
+
+to refactor:
+    # replace by target.equals to index. in add.py:40
+    check how index entries equals / diff in add/commit commands. is it ok to compare by mod_time. for just pulled repository/commit. what about sha1 and file size 
+
+global:
+    commit dir name - timestamp? hash?    

@@ -27,18 +27,22 @@ class InitCommand(Command):
             default_branch = "main"
             default_branche_dir = os.path.join(branches_dir, default_branch)
             FileUtil.create_dir_if_not_exist(default_branche_dir)
-            # 4 create active branch
+            # 4
+            head_file = "HEAD"
+            index_file_path = os.path.join(default_branche_dir, head_file)
+            FileUtil.write_lines_to_file(index_file_path, "")
+            # 5 create active branch
             active_branch_file = "active_branch"
             active_branch_file_dir = os.path.join(storage_full_path, active_branch_file)
             FileUtil.create_file_and_write(active_branch_file_dir, default_branch + "\n")
-            # 5 create list of working files
+            # 6 create list of working files
             all_files = FileUtil.list_all_files(work_dir, storage_dir)
-            # 6 create index file
+            # 7 create index file
             index_file = "index"
             index_file_path = os.path.join(storage_full_path, index_file)
             FileUtil.write_lines_to_file(index_file_path, "")
             # FileUtil.write_lines_to_file(index_file_path, all_files)
-            # 7 for all file in list of files in working dir
+            # 8 for all file in list of files in working dir
             #       add file to active / default / current branch
             objects_dir = "objects"
             objects_dir_path = os.path.join(storage_full_path, objects_dir)

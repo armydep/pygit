@@ -13,6 +13,12 @@ class IndexEntry:
         self.mod_time = mod_time
         self.size = size
 
+    def __eq__(self, other):
+        return isinstance(other, IndexEntry) and self.path == other.path and self.sha1 == other.sha1 and self.size == other.size
+
+    def __hash__(self):
+        return hash((self.path, self.sha1, self.size))
+
     def __str__(self):
         return f"{self.path}|{self.sha1}|{self.mod_time}|{self.size}"
 
@@ -77,6 +83,11 @@ class FileUtil:
                 f.write(line + "\n")
 
     @staticmethod
+    def overwrite_file(file_path: str, str1: str) -> None:
+        with open(file_path, "w") as f:
+            f.write(str1 + "\n")
+
+    @staticmethod
     def update_index_file(file_path: str, lines: list[IndexEntry]) -> None:
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
         with open(file_path, "w") as f:
@@ -111,6 +122,17 @@ class FileUtil:
             shutil.copy2(orig_file, target_dir)
 
     @staticmethod
+    def copy_dir_contents(d1: str, d2: str) -> None:
+        # os.makedirs(d2, exist_ok=True)  # Ensure d2 exists
+        for item in os.listdir(d1):
+            src = os.path.join(d1, item)
+            dst = os.path.join(d2, item)
+            if os.path.isdir(src):
+                shutil.copytree(src, dst, dirs_exist_ok=True)
+            else:
+                shutil.copy2(src, dst)
+
+    @staticmethod
     def list_dir_non_recursive_with_exclude(path: str, exc: str) -> list[str]:
         return [os.path.join(path, entry) for entry in os.listdir(path) if entry != exc]
 
@@ -122,6 +144,11 @@ class FileUtil:
     def read_lines_from_file(file_path: str) -> list[str]:
         with open(file_path, "r") as f:
             return [line.rstrip("\n") for line in f]
+
+    @staticmethod
+    def read_file_content(file_path: str) -> str:
+        with open(file_path, "r") as f:
+            return "".join(line.strip() for line in f)
 
     @staticmethod
     def sha1_of_file(file_path: str) -> str:
