@@ -5,10 +5,11 @@ import os
 
 class StatusCommand(Command):
     def validate(self) -> None:
-        print("Im status command validation")
-
+        # print("Im status command validation")
+        return
+    
     def exec(self) -> None:
-        print("Im status command exec")
+        # print("Im status command exec")
         work_dir = self.repository.work_dir()
         storage_dir = self.repository.storage_dir()
         all_working_files = FileUtil.list_all_files_rec(work_dir, storage_dir)
@@ -34,17 +35,24 @@ class StatusCommand(Command):
         # for wfe in work_file_entries:
         #     print(f"Work dir file: {wfe}")
         # modified_set = set()
+        changes_found = False
         for wfe in work_file_entries:
             if wfe not in index_entries:
                 index_entry = self._find_index_entry_by_path(index_entries, wfe.path)
                 if index_entry:
                     print(f"Modified: {index_entry.path}")
                     # modified_set.add(index_entry.path)
+                    changes_found = True
                 else:
                     print(f"Untracked (new): {wfe.path}")
+                    changes_found = True
 
         for ie in index_entries:
             if ie not in work_file_entries:
                 wd_entry = self._find_index_entry_by_path(work_file_entries, ie.path)
                 if not wd_entry:
                     print(f"Deleted: {ie.path}")
+                    changes_found = True
+
+        if not changes_found:            
+            print("No changes")
