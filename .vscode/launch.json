@@ -1,0 +1,16 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+
+        {
+            "name": "Python Debugger: Current File with Arguments",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "main.py",
+            "console": "integratedTerminal",
+            "args": ["add", "google/code/findbugs/jsr305/2.0.1/_remote.repositories"]
+            // ["abc.tx"]
+            // "args": "${command:pickArgs}"
+        }
+    ]
+}
