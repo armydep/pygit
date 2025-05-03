@@ -14,5 +14,6 @@ class Dispatcher:
             return StatusCommand(tokens[1:])
         elif tokens[0] == "add":
             return AddCommand(tokens[1:])
-        else:
+        elif tokens[0] == "commit":
             return CommitCommand(tokens[1:])
+        return None

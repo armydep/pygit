@@ -71,3 +71,11 @@ next:
     support "status"     
     refactor: remove single line functions from file_util
     move some methods into commands.base class
+
+next:
+    same routine for 'status' command and 'add .'
+    code review ai
+    fix exe
+    fix project path
+    add exclude .git / .pygit in work dir - validation
+    fix logs

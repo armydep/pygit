@@ -119,13 +119,6 @@ class AddCommand(Command):
     # def _index_contains_entry(index_entries: list[IndexEntry], entry: IndexEntry) -> bool:
     #     return any(itent.path and itent.path == entry.path for itent in index_entries)
 
-    @staticmethod
-    def _find_index_entry_by_path(entries: list[IndexEntry], target_path: str) -> Optional[IndexEntry]:
-        for entry in entries:
-            if entry.path == target_path:
-                return entry
-        return None  # Not found
-
     # todo: move into IndexEntry
     @staticmethod
     def _remove_entry_by_path(entries: list[IndexEntry], path: str) -> list[IndexEntry]:
