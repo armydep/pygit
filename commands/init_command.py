@@ -1,6 +1,5 @@
 from util.file_util import FileUtil
 from .command import Command
-# from typing import List
 import os
 import traceback
 
@@ -36,7 +35,7 @@ class InitCommand(Command):
             active_branch_file_dir = os.path.join(storage_full_path, active_branch_file)
             FileUtil.create_file_and_write(active_branch_file_dir, default_branch + "\n")
             # 6 create list of working files
-            all_files = FileUtil.list_all_files(work_dir, storage_dir)
+            #all_files = FileUtil.list_all_files(work_dir, storage_dir)
             # 7 create index file
             index_file = "index"
             index_file_path = os.path.join(storage_full_path, index_file)

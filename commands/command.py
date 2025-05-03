@@ -1,11 +1,10 @@
 from abc import ABC, abstractmethod
-from typing import List
 
 from repo import Repository
 
 
 class Command(ABC):
-    def __init__(self, tokens: List[str]):
+    def __init__(self, tokens: list[str]):
         self.args = tokens
         self.repository = Repository()
 

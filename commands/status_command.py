@@ -1,6 +1,4 @@
 from .command import Command
-
-# from typing import List
 from util.file_util import FileUtil
 import os
 
@@ -14,7 +12,7 @@ class StatusCommand(Command):
         work_dir = self.repository.work_dir()
         # print(f"working dir: {work_dir}")
         storage_dir = self.repository.storage_dir()
-        all_working_files = FileUtil.list_all_files(work_dir, storage_dir)
+        all_working_files = FileUtil.list_all_files_rec(work_dir, storage_dir)
         for f in all_working_files:
             print(f">{f}")
         index_file = "index"

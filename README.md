@@ -65,3 +65,9 @@ to refactor:
 
 global:
     commit dir name - timestamp? hash?    
+
+next:
+    support "add ."
+    support "status"     
+    refactor: remove single line functions from file_util
+    move some methods into commands.base class

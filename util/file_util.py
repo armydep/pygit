@@ -1,5 +1,4 @@
 import os
-from typing import List
 import shutil
 import hashlib
 
@@ -61,7 +60,7 @@ class FileUtil:
         # print(f"Written to {abs_path}")
 
     @staticmethod
-    def list_all_files(dir_path: str, exclude_name: str) -> List[str]:
+    def list_all_files_rec(dir_path: str, exclude_name: str) -> list[str]:
         all_files = []
         for root, dirs, files in os.walk(dir_path):
             # Exclude directories with matching name (in-place modification of 'dirs')
@@ -102,7 +101,7 @@ class FileUtil:
         shutil.copy2(orig_file, target_dir)
 
     @staticmethod
-    def list_indexed_files(path) -> List[str]:
+    def list_indexed_files(path) -> list[str]:
         with open(path, "r") as f:
             return [line.rstrip("\n") for line in f]
 
@@ -170,10 +169,13 @@ class FileUtil:
         return ts_list
 
     @staticmethod
-    def build_index_entry(file_path: str) -> list[IndexEntry]:
+    def build_index_entry(file_path: str) -> IndexEntry:
         path = file_path
         sha1 = FileUtil.sha1_of_file(file_path)
         file_stat = os.stat(file_path)
         mod_time = file_stat.st_mtime_ns
         size = file_stat.st_size
         return IndexEntry(path, sha1, mod_time, size)
+
+    def transform_paths_to_entries(paths: list[str]) -> list[IndexEntry]:
+        return list(map(FileUtil.build_index_entry, paths))

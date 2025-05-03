@@ -1,10 +1,7 @@
 from .command import Command
-from typing import List
 from util.file_util import FileUtil, IndexEntry
 from .command import Command
-from typing import Optional
 import os
-import traceback
 import time
 from collections import Counter
 
