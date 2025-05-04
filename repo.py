@@ -1,6 +1,24 @@
 class Repository:
-    def work_dir(self) -> str:
+
+    @staticmethod
+    def work_dir() -> str:
         return "/tmp/pygit/repo_work_dir_root"
+
+    @staticmethod
+    def active_branch() -> str:
+        return "active_branch"
+
+    @staticmethod
+    def branches() -> str:
+        return "branches"
+
+    @staticmethod
+    def head() -> str:
+        return "HEAD"
+
+    @staticmethod
+    def index() -> str:
+        return "index"
 
     @staticmethod
     def storage_dir() -> str:
