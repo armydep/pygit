@@ -1,19 +1,22 @@
-from commands.command import Command
-from commands.init_command import InitCommand
-from commands.status_command import StatusCommand
-from commands.commit_command import CommitCommand
-from commands.add import AddCommand
+from registry import COMMANDS
+
+from commands import status_command  
+from commands import add
+from commands import commit_command
+from commands import init_command
 
 
-class Dispatcher:
-    @staticmethod
-    def dispatch(tokens: list[str]) -> Command:
-        if tokens[0] == "init":
-            return InitCommand(tokens[1:])
-        elif tokens[0] == "status":
-            return StatusCommand(tokens[1:])
-        elif tokens[0] == "add":
-            return AddCommand(tokens[1:])
-        elif tokens[0] == "commit":
-            return CommitCommand(tokens[1:])
-        return None
+def dispatch(args):
+    if not args:
+        print("No command given")
+        return
+    cmd = args[0]
+    if cmd in COMMANDS:
+        command = COMMANDS[cmd]
+        # if hasattr(command, 'exec'):
+        #     command.exec(args[1:])
+        # else:
+        #     command(args[1:])  # fallback for function-style commands
+        command(args[1:])
+    else:
+        print(f"Unknown command: {cmd}")
