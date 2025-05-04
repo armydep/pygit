@@ -1,6 +1,33 @@
 # pygit
+create executable:
+- 
+```bash
+pyinstaller --onefile pygit.py
+```
+it will create executable in dist directory.
+then run with 'dist/pygit ...'
 
-commands
+optional: add dir to $PATH
+```bash
+mkdir -p ~/bin
+cp dist/hello ~/bin/
+export PATH="$HOME/bin:$PATH"
+source ~/.bashrc
+pygit
+```
+
+add linter:
+```bash
+pip install flake8
+flake8 .
+```
+add type hinst:
+```bash
+pip install mypy
+mypy .
+```
+
+commands:
 1. init
     pre-condition 
         there is no .pygit
