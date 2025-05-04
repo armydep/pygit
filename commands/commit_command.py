@@ -1,13 +1,13 @@
 from repo import Repository
-from util.file_util import FileUtil, IndexEntry
+from util.command_utils import compare_index_sets
+from util.file_util import FileUtil
 import os
 import time
-from collections import Counter
 from registry import register
 
 
 @register("commit")
-def commit_command(args):
+def commit_command(args, staged):
     print("[commit] Validation: " + "_".join(args))
 
     repo = Repository()
@@ -82,7 +82,7 @@ def commit_command(args):
     # print(f"Commit index: {commit_index_content}")
     commit_index_entries = FileUtil.parse_index_file_lines(commit_index_path)
 
-    if _index_entries_diff(index_entries, commit_index_entries):
+    if compare_index_sets(index_entries, commit_index_entries):
         print(f"There are staged changes. Commiting")
 
         commit_name = str(time.time_ns())
@@ -106,5 +106,3 @@ def commit_command(args):
         print(f"No staged changes since last commit, index - {commit_index_path}. Nothing to commit")
 
 
-def _index_entries_diff(index_entries: list[IndexEntry], commit_index_entries: list[IndexEntry]) -> bool:
-    return Counter(index_entries) != Counter(commit_index_entries)

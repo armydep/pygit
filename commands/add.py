@@ -7,7 +7,7 @@ import traceback
 
 
 @register("add")
-def add_command(args):
+def add_command(args, staged):
     print("Im add command exec")
     repository = Repository()
     work_dir = repository.work_dir()

@@ -23,3 +23,7 @@ class Repository:
     @staticmethod
     def storage_dir() -> str:
         return ".pygit"
+
+    @staticmethod
+    def objects() -> str:
+        return "objects"

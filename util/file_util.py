@@ -2,8 +2,6 @@ import os
 import shutil
 import hashlib
 
-# from commands.add import IndexEntry
-
 
 class IndexEntry:
     def __init__(self, path: str, sha1: str, mod_time: int, size: int):
@@ -28,10 +26,6 @@ class IndexEntry:
 
 
 class FileUtil:
-
-    # @staticmethod
-    # def is_dir_exist(path) -> bool:
-    #     return 1
 
     @staticmethod
     def is_file_exist(file_path) -> bool:
@@ -92,7 +86,6 @@ class FileUtil:
         with open(file_path, "w") as f:
             for line in lines:
                 f.write(str(line) + "\n")
-                # print(f">{line}")
 
     @staticmethod
     def add_file_to_objects(orig_file: str, target_dir: str) -> None:
@@ -179,3 +172,15 @@ class FileUtil:
 
     def transform_paths_to_entries(paths: list[str]) -> list[IndexEntry]:
         return list(map(FileUtil.build_index_entry, paths))
+
+    @staticmethod
+    def clear_dir(path: str) -> None:
+        if not os.path.isdir(path):
+            raise ValueError(f"{path} is not a directory")
+
+        for entry in os.listdir(path):
+            full_path = os.path.join(path, entry)
+            if os.path.isdir(full_path):
+                shutil.rmtree(full_path)
+            else:
+                os.remove(full_path)

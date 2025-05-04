@@ -6,14 +6,13 @@ import os
 
 
 @register("status")
-def status_command(args):
+def status_command(args, staged):
     repository = Repository()
     work_dir = repository.work_dir()
     storage_dir = repository.storage_dir()
     all_working_files = FileUtil.list_all_files_rec(work_dir, storage_dir)
     index_file = "index"
     storage_full_path = os.path.join(work_dir, storage_dir)
-    index_file_path = os.path.join(storage_full_path, index_file)
     index_file_path = os.path.join(storage_full_path, index_file)
     index_entries = FileUtil.parse_index_file_lines(index_file_path)
     all_working_files = FileUtil.list_all_files_rec(work_dir, storage_dir)

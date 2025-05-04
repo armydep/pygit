@@ -5,7 +5,7 @@ import traceback
 from repo import Repository
 
 @register("init")
-def init_command(args):
+def init_command(args, staged):
     print("Im init command exec")
     try:
         repo = Repository()
