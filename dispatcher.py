@@ -5,6 +5,9 @@ from commands import add
 from commands import commit_command
 from commands import init_command
 from commands import restore
+from commands import merge
+from commands import branch
+from commands import switch
 
 
 def dispatch(args, staged=False):

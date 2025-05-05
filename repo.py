@@ -17,6 +17,10 @@ class Repository:
         return "HEAD"
 
     @staticmethod
+    def default_branch() -> str:
+        return "main"
+
+    @staticmethod
     def index() -> str:
         return "index"
 

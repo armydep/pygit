@@ -2,7 +2,6 @@ from registry import register
 from repo import Repository
 from util.command_utils import compare_index_sets, get_head_objects_path, get_index_entries, get_index_path, get_objects_path, get_top_commit
 from util.file_util import FileUtil, IndexEntry
-import os
 
 
 @register("restore")
