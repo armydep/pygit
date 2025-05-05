@@ -21,7 +21,7 @@ def init_command(args, staged):
         # 4
         head_path = os.path.join(default_branche_dir, repo.head())
         FileUtil.write_lines_to_file(head_path, "")
-        FileUtil.create_dir_if_not_exist(os.path.join(default_branche_dir, repo.objects()))
+        # FileUtil.create_dir_if_not_exist(os.path.join(default_branche_dir, repo.objects()))
 
         # 5 create active branch
         active_branch_file_path = os.path.join(storage_full_path, repo.active_branch())

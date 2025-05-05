@@ -184,3 +184,14 @@ class FileUtil:
                 shutil.rmtree(full_path)
             else:
                 os.remove(full_path)
+
+    @staticmethod
+    def delete_all_except(p1: str, f1: str) -> None:
+        for entry in os.listdir(p1):
+            entry_path = os.path.join(p1, entry)
+            if entry == f1:
+                continue  # Skip the file to preserve
+            if os.path.isdir(entry_path):
+                shutil.rmtree(entry_path)
+            else:
+                os.remove(entry_path)

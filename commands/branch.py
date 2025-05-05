@@ -18,8 +18,8 @@ def branch_command(args, stgaded):
     if len(args) == 1 and is_valid_identifier(args[0]) and args[0] not in branches:
         branch_path = os.path.join(repository.work_dir(), repository.storage_dir(), repository.branches(), args[0])
         FileUtil.create_dir_if_not_exist(branch_path)
-        branch_obj_path = os.path.join(branch_path, repository.objects())
-        FileUtil.create_dir_if_not_exist(branch_obj_path)
+        # branch_obj_path = os.path.join(branch_path, repository.objects())
+        # FileUtil.create_dir_if_not_exist(branch_obj_path)
         branch_head_path = os.path.join(branch_path, repository.head())
         FileUtil.write_lines_to_file(branch_head_path, "")
         branches.append(args[0])

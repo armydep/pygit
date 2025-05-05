@@ -29,7 +29,22 @@ def get_head_objects_path(repository: Repository) -> str:
 
 
 def get_branch_objects_path(branch: str, repository: Repository) -> str:
-    return os.path.join(repository.work_dir(), repository.storage_dir(), repository.branches(), branch, repository.objects())
+    # return os.path.join(repository.work_dir(), repository.storage_dir(), repository.branches(), branch, repository.objects())
+    branch_head_path = os.path.join(
+        repository.work_dir(), repository.storage_dir(), repository.branches(), branch, repository.head()
+    )
+    if os.path.isfile(branch_head_path):
+        branch_head = FileUtil.read_file_content(branch_head_path)
+        if branch_head:
+            return os.path.join(
+                repository.work_dir(), repository.storage_dir(), repository.branches(), branch, branch_head, repository.objects()
+            )
+        else:
+            print(f"No branch head content(empty2): {branch_head}. path: {branch_head_path}")
+            return ""
+    else:
+        print(f"No branch head path(2): {branch_head_path}")
+        return ""
 
 
 def get_top_commit(repository: Repository) -> str:
@@ -50,6 +65,24 @@ def get_top_commit(repository: Repository) -> str:
 
 def get_index_path(repository: Repository) -> str:
     return os.path.join(repository.work_dir(), repository.storage_dir(), repository.index())
+
+
+def get_index_path_by_branch(branch: str, repository: Repository) -> str:
+    branch_head_path = os.path.join(
+        repository.work_dir(), repository.storage_dir(), repository.branches(), branch, repository.head()
+    )
+    if os.path.isfile(branch_head_path):
+        branch_head = FileUtil.read_file_content(branch_head_path)
+        if branch_head:
+            return os.path.join(
+                repository.work_dir(), repository.storage_dir(), repository.branches(), branch, branch_head, repository.index()
+            )
+        else:
+            print(f"No branch head content(empty): {branch_head}. path: {branch_head_path}")
+            return ""
+    else:
+        print(f"No branch head path: {branch_head_path}")
+        return ""
 
 
 def get_index_entries(repository: Repository) -> list[IndexEntry]:

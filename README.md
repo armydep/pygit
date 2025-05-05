@@ -106,3 +106,12 @@ next:
     fix project path
     add exclude .git / .pygit in work dir - validation
     fix logs
+
+next:
+    merge
+    cherry-pick
+    reset head
+    change home_dir path
+    tests
+    storage hosting server
+    objects structure 
