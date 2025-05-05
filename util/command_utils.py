@@ -28,6 +28,10 @@ def get_head_objects_path(repository: Repository) -> str:
         return None
 
 
+def get_branch_objects_path(branch: str, repository: Repository) -> str:
+    return os.path.join(repository.work_dir(), repository.storage_dir(), repository.branches(), branch, repository.objects())
+
+
 def get_top_commit(repository: Repository) -> str:
     active_branch_path = os.path.join(repository.work_dir(), repository.storage_dir(), repository.active_branch())
     active_branch = FileUtil.read_file_content(active_branch_path)

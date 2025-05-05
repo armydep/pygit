@@ -3,6 +3,7 @@ from repo import Repository
 from util.command_utils import (
     compare_index_sets,
     get_active_branch,
+    get_branch_objects_path,
     get_head_index_entries,
     get_head_objects_path,
     get_index_entries,
@@ -56,9 +57,10 @@ def switch(switch_to: str, head_index_entries: list[IndexEntry], repository: Rep
     FileUtil.update_index_file(index_path, head_index_entries)
     # 5 update objects
     index_objects_path = get_objects_path(repository)
-    head_objects_path = get_head_objects_path(repository)
-    print(f"Copy objects from: {head_objects_path}, to: {index_objects_path}")
-    FileUtil.copy_dir_contents(head_objects_path, index_objects_path)
+    switch_to_objects_path = get_branch_objects_path(switch_to, repository)
+    print(f"Copy objects from: {switch_to_objects_path}, to: {index_objects_path}")
+    FileUtil.clear_dir(index_objects_path)
+    FileUtil.copy_dir_contents(switch_to_objects_path, index_objects_path)
     # 6 update active branch
     update_active_branch(repository, switch_to)
     print(f"Switched to: {switch_to}")
