@@ -1,9 +1,9 @@
 from registry import COMMANDS
 
-from commands import status_command  
+from commands import status  
 from commands import add
-from commands import commit_command
-from commands import init_command
+from commands import commit
+from commands import init
 from commands import restore
 from commands import merge
 from commands import branch
