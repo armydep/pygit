@@ -1,13 +1,13 @@
 from registry import COMMANDS
 
-from commands import status  
-from commands import add
-from commands import commit
 from commands import init
-from commands import restore
-from commands import merge
-from commands import branch
-from commands import switch
+# from commands import status  
+# from commands import add
+# from commands import commit
+# from commands import restore
+# from commands import merge
+# from commands import branch
+# from commands import switch
 
 
 def dispatch(args, staged=False):

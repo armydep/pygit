@@ -1,37 +1,50 @@
+from repo import (
+    get_default_branch_ref,
+    get_head_path,
+    get_index_file_path,
+    get_objects_path,
+    get_refs_heads_path,
+    get_storage_root,
+    get_work_dir,
+)
 from util.file_util import FileUtil
 from registry import register
-import os
 import traceback
-from repo import Repository
+
+
+"""
+.git
+    HEAD - refs/heads/main
+    index - empty
+    refs
+        heads
+    objects
+"""
 
 
 @register("init")
 def init_command(args, staged):
     try:
-        repo = Repository()
-        # 1
-        storage_full_path = os.path.join(repo.work_dir(), repo.storage_dir())
-        FileUtil.create_dir_if_not_exist(storage_full_path)
-        # 2 create branches
-        branches_dir = os.path.join(storage_full_path, repo.branches())
-        FileUtil.create_dir_if_not_exist(branches_dir)
-        # 3 create default branch under branches
-        default_branche_dir = os.path.join(branches_dir, repo.default_branch())
-        FileUtil.create_dir_if_not_exist(default_branche_dir)
-        # 4
-        head_path = os.path.join(default_branche_dir, repo.head())
-        FileUtil.write_lines_to_file(head_path, "")
-        # FileUtil.create_dir_if_not_exist(os.path.join(default_branche_dir, repo.objects()))
+        # 1 create .git
+        storage_root = get_storage_root()
+        FileUtil.create_dir_if_not_exist(storage_root)
 
-        # 5 create active branch
-        active_branch_file_path = os.path.join(storage_full_path, repo.active_branch())
-        FileUtil.create_file_and_write(active_branch_file_path, repo.default_branch() + "\n")
+        # 2 create index - empty
+        # index_file_path = get_index_file_path()
+        # FileUtil.write_lines_to_file(index_file_path, "")
 
-        index_file_path = os.path.join(storage_full_path, repo.index())
-        FileUtil.write_lines_to_file(index_file_path, "")
-        objects_dir_path = os.path.join(storage_full_path, repo.objects())
-        FileUtil.create_dir_if_not_exist(objects_dir_path)
-        print(f"init done. root: {repo.work_dir()}")
+        # 3 create refs/heads/ empty //<main branch>
+        refs_heads_path = get_refs_heads_path()
+        FileUtil.create_dir_if_not_exist(refs_heads_path)
+
+        # 4 create objects
+        FileUtil.create_dir_if_not_exist(get_objects_path())
+
+        # 5 create HEAD - refs/heads/<main br>
+        head_path = get_head_path()
+        FileUtil.overwrite_file(head_path, get_default_branch_ref())
+        print(f"init done. root: {get_work_dir()}")
+
     except Exception as e:
         print(f"init failed. {e}")
         traceback.print_exc()

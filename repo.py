@@ -1,37 +1,57 @@
-class Repository:
+import os
 
-    @staticmethod
-    def work_dir() -> str:
-        return "/tmp/pygit/repo_work_dir_root"
 
-    @staticmethod
-    def active_branch() -> str:
-        return "active_branch"
+def get_storage_root() -> str:
+    return os.path.join(get_work_dir(), storage_dir())
 
-    @staticmethod
-    def branches() -> str:
-        return "branches"
 
-    @staticmethod
-    def head() -> str:
-        return "HEAD"
+def get_index_file_path() -> str:
+    return os.path.join(get_storage_root(), index())
 
-    @staticmethod
-    def default_branch() -> str:
-        return "main"
 
-    @staticmethod
-    def index() -> str:
-        return "index"
+def get_refs_heads_path() -> str:
+    return os.path.join(get_storage_root(), refs(), heads())
 
-    @staticmethod
-    def storage_dir() -> str:
-        return ".pygit"
 
-    @staticmethod
-    def objects() -> str:
-        return "objects"
-    
-    @staticmethod
-    def parent_branch() -> str:
-        return "parent_branch"    
+def get_objects_path() -> str:
+    return os.path.join(get_storage_root(), objects())
+
+
+def get_head_path() -> str:
+    return os.path.join(get_storage_root(), head())
+
+
+def get_work_dir() -> str:
+    return os.path.join("/tmp", "pygit", "work_dir")
+
+
+def get_default_branch_ref() -> str:
+    return "ref: " + os.path.join(refs(), heads(), default_branch())
+
+
+def head() -> str:
+    return "HEAD"
+
+
+def refs() -> str:
+    return "refs"
+
+
+def heads() -> str:
+    return "heads"
+
+
+def default_branch() -> str:
+    return "main"
+
+
+def index() -> str:
+    return "index"
+
+
+def storage_dir() -> str:
+    return ".pygit"
+
+
+def objects() -> str:
+    return "objects"
