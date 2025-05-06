@@ -69,8 +69,8 @@ class FileUtil:
 
     @staticmethod
     def add_file_to_objects(orig_file: str, target_dir: str) -> None:
-        if not os.path.isdir(target_dir):
-            os.makedirs(target_dir)
+        dest_dir = os.path.dirname(target_dir)
+        os.makedirs(dest_dir, exist_ok=True)
         shutil.copy2(orig_file, target_dir)
 
     @staticmethod

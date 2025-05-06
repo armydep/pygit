@@ -33,6 +33,10 @@ def convert_file_to_work_dir_path(file: str) -> str:
     return os.path.join(get_work_dir(), file)
 
 
+def get_path_in_objects(sha1: str) -> str:
+    return os.path.join(get_storage_root(), objects(), sha1[0:2], sha1[2:])
+
+
 def head() -> str:
     return "HEAD"
 

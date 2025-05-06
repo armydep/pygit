@@ -1,6 +1,6 @@
 import os
 from registry import register
-from repo import convert_file_to_work_dir_path, get_index_file_path, get_storage_root
+from repo import convert_file_to_work_dir_path, get_index_file_path, get_path_in_objects, get_storage_root
 from util.command_utils import find_by_path
 from util.file_util import FileUtil, IndexEntry
 import traceback
@@ -71,11 +71,15 @@ def add_single_file(args, staged) -> None:
                         entry_from_index.sha1 = target_index_entry.sha1
                         entry_from_index.size = target_index_entry.size
                         FileUtil.update_index_file(index_file_path, index_entries)
+                        path_in_objects = get_path_in_objects(target_index_entry.sha1)
+                        FileUtil.add_file_to_objects(target_file, path_in_objects)
                         print(f"Target file modified. Updated in stage: {args[0]}")
                 else:  # file not in staging. exists in work dir. add to staging
                     index_entries.append(target_index_entry)
                     FileUtil.update_index_file(index_file_path, index_entries)
-                    print(f"New file added to stage {args[0]}")
+                    path_in_objects = get_path_in_objects(target_index_entry.sha1)
+                    FileUtil.add_file_to_objects(target_file, path_in_objects)
+                    print(f"New file added to stage {args[0]}. Path in objects: {path_in_objects}")
             else:  # target not in work dir. index exists. Remove from staging the file that removed from work dir
                 if entry_from_index:
                     index_entries = _remove_entry_by_path(index_entries, args[0])
@@ -87,7 +91,9 @@ def add_single_file(args, staged) -> None:
             if is_target_exist_in_work_dir:
                 target_index_entry = FileUtil.build_index_entry(target_file, args[0])
                 FileUtil.update_index_file(index_file_path, [target_index_entry])
-                print(f"Adding new index entry: {target_index_entry}")
+                path_in_objects = get_path_in_objects(target_index_entry.sha1)
+                FileUtil.add_file_to_objects(target_file, path_in_objects)
+                print(f"Added new index entry: {target_index_entry}")
             else:
                 print("Nothing to add. File does not exist in working directory nor in index")
     except Exception as e:
