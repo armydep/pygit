@@ -29,6 +29,10 @@ def get_default_branch_ref() -> str:
     return "ref: " + os.path.join(refs(), heads(), default_branch())
 
 
+def convert_file_to_work_dir_path(file: str) -> str:
+    return os.path.join(get_work_dir(), file)
+
+
 def head() -> str:
     return "HEAD"
 

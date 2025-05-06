@@ -2,27 +2,7 @@ import os
 import shutil
 import hashlib
 
-
-class IndexEntry:
-    def __init__(self, path: str, sha1: str, mod_time: int, size: int):
-        self.path = path
-        self.sha1 = sha1
-        self.mod_time = mod_time
-        self.size = size
-
-    def __eq__(self, other):
-        return isinstance(other, IndexEntry) and self.path == other.path and self.sha1 == other.sha1 and self.size == other.size
-
-    def __hash__(self):
-        return hash((self.path, self.sha1, self.size))
-
-    def __str__(self):
-        return f"{self.path}|{self.sha1}|{self.mod_time}|{self.size}"
-
-    @classmethod
-    def from_string(cls, line: str):
-        path, sha1, mod_time_str, size_str = line.split("|")
-        return cls(path, sha1, int(mod_time_str), int(size_str))
+from index_entry import IndexEntry
 
 
 class FileUtil:
@@ -156,19 +136,18 @@ class FileUtil:
         with open(file_path, "r") as f:
             for line in f:
                 line = line.strip()
-                if line:  # skip empty lines
-                    # tokens = line.split("|")
+                if line:
                     ts_list.append(IndexEntry.from_string(line))
         return ts_list
 
     @staticmethod
-    def build_index_entry(file_path: str) -> IndexEntry:
-        path = file_path
-        sha1 = FileUtil.sha1_of_file(file_path)
-        file_stat = os.stat(file_path)
+    def build_index_entry(abs_path: str, rel_path: str) -> IndexEntry:
+        sha1 = FileUtil.sha1_of_file(abs_path)
+        file_stat = os.stat(abs_path)
         mod_time = file_stat.st_mtime_ns
         size = file_stat.st_size
-        return IndexEntry(path, sha1, mod_time, size)
+        stage_num = 0
+        return IndexEntry(rel_path, sha1, mod_time, size, stage_num)
 
     def transform_paths_to_entries(paths: list[str]) -> list[IndexEntry]:
         return list(map(FileUtil.build_index_entry, paths))

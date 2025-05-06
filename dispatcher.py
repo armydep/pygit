@@ -1,8 +1,8 @@
 from registry import COMMANDS
 
 from commands import init
+from commands import add
 # from commands import status  
-# from commands import add
 # from commands import commit
 # from commands import restore
 # from commands import merge
