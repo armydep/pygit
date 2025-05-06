@@ -1,7 +1,7 @@
 import os
 from registry import register
 from repo import Repository
-from util.command_utils import get_active_branch, list_branches
+from util.command_utils import at_least_one_commit_exist, get_active_branch, get_head, list_branches
 from util.file_util import FileUtil
 
 
@@ -16,14 +16,20 @@ def branch_command(args, stgaded):
     repository = Repository()
     branches: list[str] = list_branches(repository)
     if len(args) == 1 and is_valid_identifier(args[0]) and args[0] not in branches:
-        branch_path = os.path.join(repository.work_dir(), repository.storage_dir(), repository.branches(), args[0])
-        FileUtil.create_dir_if_not_exist(branch_path)
-        # branch_obj_path = os.path.join(branch_path, repository.objects())
-        # FileUtil.create_dir_if_not_exist(branch_obj_path)
-        branch_head_path = os.path.join(branch_path, repository.head())
-        FileUtil.write_lines_to_file(branch_head_path, "")
-        branches.append(args[0])
-        print("Created")
+        head = get_head(repository)
+        if head:  # at_least_one_commit_exist
+            parent = ""
+            branch_path = os.path.join(repository.work_dir(), repository.storage_dir(), repository.branches(), args[0])
+            FileUtil.create_dir_if_not_exist(branch_path)
+            # created /wd/.storage/branches/new branch
+
+            branch_head_path = os.path.join(branch_path, repository.head())
+            # current head >  /wd/.storage/branches/new branch/parent
+            FileUtil.write_lines_to_file(branch_head_path, parent)
+            branches.append(args[0])
+            print("Created")
+        else:
+            print("Create at least one commit before creating a new branch")
 
     print(f"[branch]")
     active_branch = get_active_branch(repository)

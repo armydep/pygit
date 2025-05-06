@@ -31,3 +31,7 @@ class Repository:
     @staticmethod
     def objects() -> str:
         return "objects"
+    
+    @staticmethod
+    def parent_branch() -> str:
+        return "parent_branch"    

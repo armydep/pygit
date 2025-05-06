@@ -1,6 +1,6 @@
 from registry import register
 from repo import Repository
-from util.command_utils import compare_index_sets, get_head_objects_path, get_index_entries, get_index_path, get_objects_path, get_top_commit
+from util.command_utils import compare_index_sets, get_head_objects_path, get_index_entries, get_index_path, get_objects_path, get_head_commit_index_path
 from util.file_util import FileUtil, IndexEntry
 
 
@@ -9,7 +9,7 @@ def restore_command(args, stgaded):
     repository = Repository()
     print(f"[restore] staged:{stgaded}")
     index_entries: list[IndexEntry] = get_index_entries(repository)
-    prev_commit_index_path = get_top_commit(repository)
+    prev_commit_index_path = get_head_commit_index_path(repository)
     if prev_commit_index_path:
         prev_index_entries = FileUtil.parse_index_file_lines(prev_commit_index_path)
         if compare_index_sets(index_entries, prev_index_entries):

@@ -1,6 +1,6 @@
 from registry import register
 from repo import Repository
-from util.command_utils import find_by_path, get_top_commit
+from util.command_utils import find_by_path, get_head_commit_index_path
 from util.file_util import FileUtil
 import os
 
@@ -8,18 +8,14 @@ import os
 @register("status")
 def status_command(args, staged):
     repository = Repository()
-    work_dir = repository.work_dir()
-    storage_dir = repository.storage_dir()
-    all_working_files = FileUtil.list_all_files_rec(work_dir, storage_dir)
-    index_file = "index"
-    storage_full_path = os.path.join(work_dir, storage_dir)
-    index_file_path = os.path.join(storage_full_path, index_file)
+    storage_full_path = os.path.join(repository.work_dir(), repository.storage_dir())
+    index_file_path = os.path.join(storage_full_path, repository.index())
     index_entries = FileUtil.parse_index_file_lines(index_file_path)
-    all_working_files = FileUtil.list_all_files_rec(work_dir, storage_dir)
+    all_working_files = FileUtil.list_all_files_rec(repository.work_dir(), repository.storage_dir())
     work_file_entries = FileUtil.transform_paths_to_entries(all_working_files)
     changes_found = False
     # 1. work dir vs staging area
-    print("1. Changes not staged for commit. (Work dir vs staging area check)")
+    print("1. Changes to be staged. (Work dir vs staging area check)")
     for wfe in work_file_entries:
         if wfe not in index_entries:
             index_entry = find_by_path(index_entries, wfe.path)
@@ -41,7 +37,7 @@ def status_command(args, staged):
     # 2. staging area vs latest commit
     print("2. Changes to be commited. (Staging area vs latest commit check)")
 
-    prev_commit_index_path = get_top_commit(repository)
+    prev_commit_index_path = get_head_commit_index_path(repository)
     if prev_commit_index_path:
         changes_found = False
         prev_index_entries = FileUtil.parse_index_file_lines(prev_commit_index_path)
