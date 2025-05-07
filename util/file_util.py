@@ -61,6 +61,13 @@ class FileUtil:
             f.write(str1 + "\n")
 
     @staticmethod
+    def create_file_with_dir(file_path: str, content: str) -> None:
+        dir_path = os.path.dirname(file_path)
+        os.makedirs(dir_path, exist_ok=True)
+        with open(file_path, "w", encoding="utf-8") as f:
+            f.write(content)
+
+    @staticmethod
     def update_index_file(file_path: str, lines: list[IndexEntry]) -> None:
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
         with open(file_path, "w") as f:

@@ -1,25 +1,138 @@
-from repo import Repository
-from util.command_utils import compare_index_sets
-from util.file_util import FileUtil
-import os
+import hashlib
 import time
+from index_entry import IndexEntry
+from model.tree_object import TreeObject
+from repo import get_index_file_path, get_path_in_objects, get_storage_root, get_tree_object
+from util.file_util import FileUtil
 from registry import register
+
+"""
+    1. check if there something to commit
+
+    if not 
+        print nothing to commit
+        return    
+
+    1. take index entries
+
+    2. take head commit 
+        if there is a head commit
+    
+        take tree object
+
+    3. blobs set bs = {}    
+    4. if head commit exists    
+    5.      compare commit tree object vs index entries
+    6.       fill blobs_set
+    5. else
+    7.       fill blobs_set
+    8. create tree object (blobs_set)
+    9. create commit object (tree object)
+"""
 
 
 @register("commit")
 def commit_command(args, staged):
-    print("[commit] Validation: " + "_".join(args))
-
-    repo = Repository()
-    WORK_DIR = repo.work_dir()
-    print(f"working dir: {WORK_DIR}")
-    STORAGE_DIR = repo.storage_dir()
-    storage_full_path = os.path.join(WORK_DIR, STORAGE_DIR)
-
+    message = "my message com!"
+    print("[commit] 1 Validation: " + "_".join(args))
+    storage_full_path = get_storage_root()
     if not FileUtil.is_dir_exist(storage_full_path):
         print("The work dir is not a git repository. missing .git directory")
         return
 
+    index_file_path = get_index_file_path()
+    print(f"[commit] 2 index path: {index_file_path}")
+    if not FileUtil.is_file_exist(index_file_path):
+        print("No index file. Add files to stage. Nothing to commit")
+        return
+    print("[commit] 3")
+    index_entries = FileUtil.parse_index_file_lines(index_file_path)
+    print(f"[commit] 4. index_entries: {index_entries}")
+    head_tree: TreeObject = get_tree_object()
+    print(f"[commit] 4. tree_object: {head_tree}")
+    if head_tree:
+        print(f"Head tree exists")
+    else:
+        if not index_entries:
+            print(f"No head tree. No commits yet and o staged files. Nothing to commit")
+            return
+        create_commit(index_entries, message)
+
+
+def create_commit(index_entries: list[IndexEntry], message: str, parent: str = "") -> None:
+    tree_hash = create_tree_object(index_entries)
+    if parent:
+        parent = f"parent {parent}\n"
+    timestamp = str(time.time_ns())
+    author_line = f"author Auth <pygit@pygit.com> {timestamp}"
+    committer_line = f"commiter Cm <pygit@pygit.com> {timestamp}"
+    message_line = f"\n{message} - {timestamp}"
+    commit_object_content = f"tree {tree_hash}\n{parent}{author_line}\n{committer_line}\n{message_line}\n"
+
+    size_ = len(commit_object_content)
+    mode_ = 000000
+    wrap = f"commit {size_} {mode_} {commit_object_content}"
+    commit_hash = hashlib.sha1(wrap.encode("utf-8")).hexdigest()
+
+    path_in_objects = get_path_in_objects(commit_hash)
+    FileUtil.create_file_with_dir(path_in_objects, commit_object_content)
+
+
+"""
+tree b2a6bc2d5b6175ca82adbce1eea8a0df4fd12b14
+parent cf53306bf948ebc45fa114bc3cfbccae8a9cecc6
+author Arkady <orkasha@gmail.com> 1746481341 +0300
+committer Arkady <orkasha@gmail.com> 1746481341 +0300
+
+swtich fixed
+"""
+
+
+def create_tree_object(index_entries: list[IndexEntry]) -> str:
+    tree_obj_content = ""
+    for ie in index_entries:
+        mode_ = 000000
+        type_ = "blob"
+        hash_ = ie.sha1
+        name_ = ie.path
+        tree_obj_content += f"{mode_} {type_} {hash_}\t{name_}\n"
+
+    size_ = len(tree_obj_content)
+    mode_ = 000000
+
+    wrap = f"tree {size_} {mode_} {tree_obj_content}"
+    tree_hash = hashlib.sha1(wrap.encode("utf-8")).hexdigest()
+
+    path_in_objects = get_path_in_objects(tree_hash)
+    FileUtil.create_file_with_dir(path_in_objects, tree_obj_content)
+
+    return tree_hash
+
+
+"""
+    1. check if there something to commit
+
+    if not 
+        print nothing to commit
+        return    
+
+    1. take index entries
+
+    2. take head commit 
+        if there is a head commit
+    
+        take tree object
+
+    3. blobs set bs = {}    
+    4. if head commit exists    
+    5.      compare commit tree object vs index entries
+    6.       fill blobs_set
+    5. else
+    7.       fill blobs_set
+    8. create tree object (blobs_set)
+    9. create commit object (tree object)
+        
+    
     # objects_dir = "objects"
     index_file = "index"
     index_file_path = os.path.join(storage_full_path, index_file)
@@ -78,8 +191,6 @@ def commit_command(args, staged):
     # Now we should detect if there are staged files since last commit
     commit_index_path = os.path.join(branch_root, head, "index")
     print(f"There are prev commits. Lets diff. head commit file: {commit_index_path}")
-    # commit_index_content = FileUtil.read_file_content(commit_st)
-    # print(f"Commit index: {commit_index_content}")
     commit_index_entries = FileUtil.parse_index_file_lines(commit_index_path)
 
     if compare_index_sets(index_entries, commit_index_entries):
@@ -106,3 +217,4 @@ def commit_command(args, staged):
         print(f"No staged changes since last commit, index - {commit_index_path}. Nothing to commit")
 
 
+"""
