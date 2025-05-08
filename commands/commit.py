@@ -2,7 +2,7 @@ import hashlib
 import time
 from index_entry import IndexEntry
 from model.tree_object import TreeObject
-from repo import get_index_file_path, get_path_in_objects, get_storage_root, get_tree_object
+from repo import create_head_commit_ref, get_index_file_path, get_path_in_objects, get_storage_root, get_tree_object
 from util.file_util import FileUtil
 from registry import register
 
@@ -31,6 +31,9 @@ from registry import register
 """
 
 
+# No commits yet on branch. No head commit.
+# ref path: /home/duser/projects/git-pygit/work_dir/.pygit/refs/heads/main
+# print(f"No commits yet on branch. No head commit. ref path: {_head_commit_hash_path(branch_name)}")
 @register("commit")
 def commit_command(args, staged):
     message = "my message com!"
@@ -76,6 +79,9 @@ def create_commit(index_entries: list[IndexEntry], message: str, parent: str = "
 
     path_in_objects = get_path_in_objects(commit_hash)
     FileUtil.create_file_with_dir(path_in_objects, commit_object_content)
+    # _head_commit_hash_path(branch_name)}")
+    # path =
+    create_head_commit_ref(commit_hash)
 
 
 """

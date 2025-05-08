@@ -69,6 +69,14 @@ def objects() -> str:
     return "objects"
 
 
+def create_head_commit_ref(commit_hash) -> None:
+    head_content = FileUtil.read_file_content(get_head_path())
+    branch_name = _extract_branch_name(head_content)
+    path = os.path.join(get_refs_heads_path(), branch_name)
+    print(f"Branch head create in: {path}. {commit_hash}")
+    FileUtil.create_file_with_dir(path, commit_hash + "\n")
+
+
 def _extract_branch_name(head_content) -> str:
     if head_content.startswith("ref: refs/heads/"):
         branch = head_content.split("refs/heads/")[1]
@@ -138,10 +146,12 @@ def flatten_tree_object_rec(tree_hash: str, dirname: str = "") -> list[dict[str,
             en["name"] = os.path.join(dirname, en["name"])
             flat_blobs.append(en)
         elif en["type"] == "tree":
-            sub_dir_flat = flatten_tree_object_rec(en["hash"], os.path.join(dirname, en["hash"]))
+            sub_dir_flat = flatten_tree_object_rec(en["hash"], os.path.join(dirname, en["name"]))
             flat_blobs.extend(sub_dir_flat)
         else:
             raise Exception(f"Tree object parsing error. Unknown type: {en["type"]} .{tree_hash}")
+        
+    return flat_blobs
 
 
 def tree_object_by_hash(commit_tree_hash: str) -> list[dict[str, str]]:
