@@ -143,14 +143,14 @@ def flatten_tree_object_rec(tree_hash: str, dirname: str = "") -> list[dict[str,
         raise Exception(f"Tree not found by hash! {tree_hash}")
     for en in tree_object_base:
         if en["type"] == "blob":
-            en["name"] = os.path.join(dirname, en["name"])
+            en["name"] = en["name"]  # os.path.join(dirname, en["name"])
             flat_blobs.append(en)
         elif en["type"] == "tree":
-            sub_dir_flat = flatten_tree_object_rec(en["hash"], os.path.join(dirname, en["name"]))
+            sub_dir_flat = flatten_tree_object_rec(en["hash"], en["name"])  # os.path.join(dirname, en["name"]))
             flat_blobs.extend(sub_dir_flat)
         else:
             raise Exception(f"Tree object parsing error. Unknown type: {en["type"]} .{tree_hash}")
-        
+
     return flat_blobs
 
 
