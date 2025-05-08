@@ -26,7 +26,7 @@ def get_head_path() -> str:
 
 
 def get_work_dir() -> str:
-    return os.path.join("/tmp", "pygit", "work_dir")
+    return os.path.join("/home/duser/projects/git-pygit/work_dir")
 
 
 def get_default_branch_ref() -> str:

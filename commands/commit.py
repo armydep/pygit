@@ -70,7 +70,7 @@ def create_commit(index_entries: list[IndexEntry], message: str, parent: str = "
     commit_object_content = f"tree {tree_hash}\n{parent}{author_line}\n{committer_line}\n{message_line}\n"
 
     size_ = len(commit_object_content)
-    mode_ = 000000
+    mode_ = "000000"
     wrap = f"commit {size_} {mode_} {commit_object_content}"
     commit_hash = hashlib.sha1(wrap.encode("utf-8")).hexdigest()
 
@@ -109,10 +109,42 @@ class IndexTree:
             # self.sub_trees[headDir] = subTree
             subTree.propagate_build(strip_root_dir(path), entry)
 
+    def generate_hash_rec(self) -> str:
+        tree_object_content = ""
+        for key, value in self.sub_trees.items():
+            # print(key, value)
+            sub_tree_hash = value.generate_hash_rec()
+            mode_ = "000000"
+            line = f"{mode_} tree {sub_tree_hash}\t{value.root}\n"
+            tree_object_content += line
+
+        for blob in self.blobs:
+            mode_ = "000000"
+            line = f"{mode_} blob {blob.sha1}\t{blob.path}\n"
+            tree_object_content += line
+
+        size_ = len(tree_object_content)
+        mode_ = "000000"
+        wrap = f"tree {size_} {mode_} {tree_object_content}"
+        self.sha1 = hashlib.sha1(wrap.encode("utf-8")).hexdigest()
+
+        path_in_objects = get_path_in_objects(self.sha1)
+        return self.sha1
+        # FileUtil.create_file_with_dir(path_in_objects, commit_object_content)
+
+
+"""
+git cat-file -p 07fbb54a88b2d5297ebbd4609eb9f748bd838208
+
+100644 blob 8baef1b4abc478178b004d62031cf7fe6db6f903	bbb.txt
+040000 tree e183545695a5d1e4fdc4f3a9a9c78eca572a95c2	myp1
+100644 blob 1a52584b7fb352fc19c3b1937cddc22015308c38	sec.txt
+"""
+
 
 def create_tree_object(index_entries: list[IndexEntry]) -> str:
     tree: IndexTree = buildIndexTree(index_entries)
-
+    tree.generate_hash_rec()
     return tree.sha1
 
 
