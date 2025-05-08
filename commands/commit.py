@@ -87,26 +87,62 @@ committer Arkady <orkasha@gmail.com> 1746481341 +0300
 swtich fixed
 """
 
+"""
+1. 
+"""
+
+
+class IndexTree:
+    def __init__(self, root: str):
+        self.root = root
+        self.sha1 = ""
+        self.blobs: list[IndexEntry] = []
+        self.sub_trees: dict[str, IndexTree] = {}
+
+    def propagate_build(self, path: str, entry: IndexEntry) -> None:
+        if is_base_level_file(path):
+            self.blobs.append(entry)
+        else:
+            headDir = get_root_dir(path)
+            subTree = self.sub_trees.setdefault(headDir, IndexTree(headDir))
+            # subTree = IndexTree(headDir)
+            # self.sub_trees[headDir] = subTree
+            subTree.propagate_build(strip_root_dir(path), entry)
+
 
 def create_tree_object(index_entries: list[IndexEntry]) -> str:
-    tree_obj_content = ""
-    for ie in index_entries:
-        mode_ = 000000
-        type_ = "blob"
-        hash_ = ie.sha1
-        name_ = ie.path
-        tree_obj_content += f"{mode_} {type_} {hash_}\t{name_}\n"
+    tree: IndexTree = buildIndexTree(index_entries)
 
-    size_ = len(tree_obj_content)
-    mode_ = 000000
+    return tree.sha1
 
-    wrap = f"tree {size_} {mode_} {tree_obj_content}"
-    tree_hash = hashlib.sha1(wrap.encode("utf-8")).hexdigest()
 
-    path_in_objects = get_path_in_objects(tree_hash)
-    FileUtil.create_file_with_dir(path_in_objects, tree_obj_content)
+def strip_root_dir(path: str) -> str:
+    parts = path.split("/", 1)
+    return parts[1] if len(parts) > 1 else ""
 
-    return tree_hash
+
+def get_root_dir(path: str) -> str:
+    parts = path.split("/", 1)
+    return parts[0]
+
+
+def is_base_level_file(path: str) -> bool:
+    return "/" not in path
+
+
+def buildIndexTree(index_entries: list[IndexEntry]) -> IndexTree:
+    tree = IndexTree("")
+    for entry in index_entries:
+        if is_base_level_file(entry.path):
+            tree.blobs.append(entry)
+        else:
+            headDir = get_root_dir(entry.path)
+            subTree: IndexTree = tree.sub_trees.setdefault(headDir, IndexTree(headDir))
+            # if not subTree:
+            #     subTree = IndexTree(headDir)
+            #     tree.sub_trees[headDir] = subTree
+            subTree.propagate_build(strip_root_dir(entry.path), entry)
+    return tree
 
 
 """
@@ -216,5 +252,32 @@ def create_tree_object(index_entries: list[IndexEntry]) -> str:
     else:
         print(f"No staged changes since last commit, index - {commit_index_path}. Nothing to commit")
 
+        
 
+        def create_tree_object(index_entries: list[IndexEntry]) -> str:
+    tree_obj_content = ""
+    for ie in index_entries:
+        if is_base_level_file(ie.path):
+            mode_ = 000000
+            type_ = "blob"
+            name_ = ie.path
+            hash_ = ie.sha1
+            tree_obj_content += f"{mode_} {type_} {hash_}\t{name_}\n"
+        else:
+            mode_ = 000000
+            type_ = "tree"
+            name_ = strip_root_dir(ie.path)
+            hash_ = create_subtree_rec(name_, ie.sha1)
+            tree_obj_content += f"{mode_} {type_} {hash_}\t{name_}\n"
+
+    size_ = len(tree_obj_content)
+    mode_ = 000000
+
+    wrap = f"tree {size_} {mode_} {tree_obj_content}"
+    tree_hash = hashlib.sha1(wrap.encode("utf-8")).hexdigest()
+
+    path_in_objects = get_path_in_objects(tree_hash)
+    FileUtil.create_file_with_dir(path_in_objects, tree_obj_content)
+
+    return tree_hash
 """
