@@ -105,14 +105,11 @@ class IndexTree:
         else:
             headDir = get_root_dir(path)
             subTree = self.sub_trees.setdefault(headDir, IndexTree(headDir))
-            # subTree = IndexTree(headDir)
-            # self.sub_trees[headDir] = subTree
             subTree.propagate_build(strip_root_dir(path), entry)
 
     def generate_hash_rec(self) -> str:
         tree_object_content = ""
         for key, value in self.sub_trees.items():
-            # print(key, value)
             sub_tree_hash = value.generate_hash_rec()
             mode_ = "000000"
             line = f"{mode_} tree {sub_tree_hash}\t{value.root}\n"
@@ -129,8 +126,8 @@ class IndexTree:
         self.sha1 = hashlib.sha1(wrap.encode("utf-8")).hexdigest()
 
         path_in_objects = get_path_in_objects(self.sha1)
+        FileUtil.create_file_with_dir(path_in_objects, tree_object_content)
         return self.sha1
-        # FileUtil.create_file_with_dir(path_in_objects, commit_object_content)
 
 
 """
@@ -144,8 +141,8 @@ git cat-file -p 07fbb54a88b2d5297ebbd4609eb9f748bd838208
 
 def create_tree_object(index_entries: list[IndexEntry]) -> str:
     tree: IndexTree = buildIndexTree(index_entries)
-    tree.generate_hash_rec()
-    return tree.sha1
+    hash = tree.generate_hash_rec()
+    return hash
 
 
 def strip_root_dir(path: str) -> str:
@@ -170,9 +167,6 @@ def buildIndexTree(index_entries: list[IndexEntry]) -> IndexTree:
         else:
             headDir = get_root_dir(entry.path)
             subTree: IndexTree = tree.sub_trees.setdefault(headDir, IndexTree(headDir))
-            # if not subTree:
-            #     subTree = IndexTree(headDir)
-            #     tree.sub_trees[headDir] = subTree
             subTree.propagate_build(strip_root_dir(entry.path), entry)
     return tree
 
