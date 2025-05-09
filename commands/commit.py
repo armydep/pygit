@@ -3,7 +3,13 @@ import os
 import time
 from index_entry import IndexEntry
 from model.tree_object import TreeObject
-from repo import create_head_commit_ref, get_index_file_path, get_path_in_objects, get_storage_root, get_tree_object
+from repo import (
+    create_head_commit_ref,
+    get_flat_tree_object,
+    get_index_file_path,
+    get_path_in_objects,
+    get_storage_root,
+)
 from util.file_util import FileUtil
 from registry import register
 
@@ -52,15 +58,33 @@ def commit_command(args, staged):
     print("[commit] 3")
     index_entries = FileUtil.parse_index_file_lines(index_file_path)
     print(f"[commit] 4. index_entries: {index_entries}")
-    head_tree: TreeObject = get_tree_object()
-    print(f"[commit] 4. tree_object: {head_tree}")
-    if head_tree:
-        print(f"Head tree exists")
-    else:
-        if not index_entries:
-            print(f"No head tree. No commits yet and o staged files. Nothing to commit")
+    flat_head_tree: list[dict[str, str]] = get_flat_tree_object()
+    print(f"[commit] 4. tree_object: {flat_head_tree}")
+    if flat_head_tree:
+        print(f"[commit] 5. Head tree exists")
+        if head_equals_to_index(flat_head_tree, index_entries):
+            print(f"[commit] 6. Head tree equals to Index. Nothing to commit")
             return
         create_commit(index_entries, message)
+    else:
+        if not index_entries:
+            print(f"[commit] 5. No head tree. No commits yet and o staged files. Nothing to commit")
+            return
+        create_commit(index_entries, message)
+
+
+# should be compared by two trees. convert index to tree
+def head_equals_to_index(flat_tree: list[dict[str, str]], index_entries: list[IndexEntry]) -> bool:
+    if len(flat_tree) != len(index_entries):
+        return False
+    for entry in index_entries:
+        if not (index_tree_found_in_flat_tree_object(entry, flat_tree)):
+            return False
+    return True
+
+
+def index_tree_found_in_flat_tree_object(entry: IndexEntry, flat_tree: list[dict[str, str]]) -> bool:
+    return any(blob.get("name") == entry.path and blob.get("hash") == entry.sha1 for blob in flat_tree)
 
 
 def create_commit(index_entries: list[IndexEntry], message: str, parent: str = "") -> None:
@@ -80,23 +104,8 @@ def create_commit(index_entries: list[IndexEntry], message: str, parent: str = "
 
     path_in_objects = get_path_in_objects(commit_hash)
     FileUtil.create_file_with_dir(path_in_objects, commit_object_content)
-    # _head_commit_hash_path(branch_name)}")
-    # path =
     create_head_commit_ref(commit_hash)
-
-
-"""
-tree b2a6bc2d5b6175ca82adbce1eea8a0df4fd12b14
-parent cf53306bf948ebc45fa114bc3cfbccae8a9cecc6
-author Arkady <orkasha@gmail.com> 1746481341 +0300
-committer Arkady <orkasha@gmail.com> 1746481341 +0300
-
-swtich fixed
-"""
-
-"""
-1. 
-"""
+    print(f"Commit created: {commit_hash}")
 
 
 class IndexTree:
@@ -136,15 +145,6 @@ class IndexTree:
         path_in_objects = get_path_in_objects(self.sha1)
         FileUtil.create_file_with_dir(path_in_objects, tree_object_content)
         return self.sha1
-
-
-"""
-git cat-file -p 07fbb54a88b2d5297ebbd4609eb9f748bd838208
-
-100644 blob 8baef1b4abc478178b004d62031cf7fe6db6f903	bbb.txt
-040000 tree e183545695a5d1e4fdc4f3a9a9c78eca572a95c2	myp1
-100644 blob 1a52584b7fb352fc19c3b1937cddc22015308c38	sec.txt
-"""
 
 
 def create_tree_object(index_entries: list[IndexEntry]) -> str:

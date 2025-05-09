@@ -89,7 +89,7 @@ def _head_commit_hash_path(branch) -> str:
     return os.path.join(get_refs_heads_path(), branch)
 
 
-def get_tree_object() -> TreeObject:
+def get_flat_tree_object() -> list[dict[str, str]]:
     print("tree entries")
     # 1
     head_content = FileUtil.read_file_content(get_head_path())
@@ -112,28 +112,11 @@ def get_tree_object() -> TreeObject:
     commit_tree_hash = commit_object.tree_hash
     print(f"Tree hash: {commit_tree_hash}")
 
-    # tree_object_path = get_path_in_objects(commit_tree_hash)
-    # print(f"Tree object path: {tree_object_path}")
-    # tree_object_content = FileUtil.read_lines_from_file(tree_object_path)
-    # print(f"Tree object content: {tree_object_content}")
-    # tree_object: TreeObject = TreeObject.from_string(tree_object_content)
     tree_object: list[dict[str, str]] = flatten_tree_object_rec(commit_tree_hash)
     print("Tree flat blobs list built")
     for blob in tree_object:
         print(f"\t{blob}")
-    """
-    1. <head> <- read content of file(HEAD)
-    2. <branch name> <- content of file(HEAD)
-    3. if not file exist (branch name)
-            ..
-     <head commit hash> <- read content of (refs/heads/<branch name>)        
-    5. commit content < - read content (objects / <head commit hash>) 
-    6. tree hash <- parse (commit object)
-    7. tree object <- read content (tree hash)
-    8. tree entries <- parse (tree object)       
-    """
-
-    # return None
+    return tree_object
 
 
 def flatten_tree_object_rec(tree_hash: str, dirname: str = "") -> list[dict[str, str]]:
@@ -143,10 +126,10 @@ def flatten_tree_object_rec(tree_hash: str, dirname: str = "") -> list[dict[str,
         raise Exception(f"Tree not found by hash! {tree_hash}")
     for en in tree_object_base:
         if en["type"] == "blob":
-            en["name"] = en["name"]  # os.path.join(dirname, en["name"])
+            en["name"] = os.path.join(dirname, en["name"])
             flat_blobs.append(en)
         elif en["type"] == "tree":
-            sub_dir_flat = flatten_tree_object_rec(en["hash"], en["name"])  # os.path.join(dirname, en["name"]))
+            sub_dir_flat = flatten_tree_object_rec(en["hash"], os.path.join(dirname, en["name"]))
             flat_blobs.extend(sub_dir_flat)
         else:
             raise Exception(f"Tree object parsing error. Unknown type: {en["type"]} .{tree_hash}")
