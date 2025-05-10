@@ -2,7 +2,6 @@ import hashlib
 import os
 import time
 from index_entry import IndexEntry
-from model.tree_object import TreeObject
 from repo import (
     create_head_commit_ref,
     get_flat_tree_object,
@@ -12,30 +11,6 @@ from repo import (
 )
 from util.file_util import FileUtil
 from registry import register
-
-"""
-    1. check if there something to commit
-
-    if not 
-        print nothing to commit
-        return    
-
-    1. take index entries
-
-    2. take head commit 
-        if there is a head commit
-    
-        take tree object
-
-    3. blobs set bs = {}    
-    4. if head commit exists    
-    5.      compare commit tree object vs index entries
-    6.       fill blobs_set
-    5. else
-    7.       fill blobs_set
-    8. create tree object (blobs_set)
-    9. create commit object (tree object)
-"""
 
 
 # No commits yet on branch. No head commit.
@@ -83,6 +58,7 @@ def head_equals_to_index(flat_tree: list[dict[str, str]], index_entries: list[In
     return True
 
 
+# should be compared by file mode as well.
 def index_tree_found_in_flat_tree_object(entry: IndexEntry, flat_tree: list[dict[str, str]]) -> bool:
     return any(blob.get("name") == entry.path and blob.get("hash") == entry.sha1 for blob in flat_tree)
 
@@ -203,3 +179,26 @@ def buildIndexTree(index_entries: list[IndexEntry]) -> IndexTree:
     9. create commit object (tree object)
         
  """
+"""
+    1. check if there something to commit
+
+    if not 
+        print nothing to commit
+        return    
+
+    1. take index entries
+
+    2. take head commit 
+        if there is a head commit
+    
+        take tree object
+
+    3. blobs set bs = {}    
+    4. if head commit exists    
+    5.      compare commit tree object vs index entries
+    6.       fill blobs_set
+    5. else
+    7.       fill blobs_set
+    8. create tree object (blobs_set)
+    9. create commit object (tree object)
+"""

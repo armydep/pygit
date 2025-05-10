@@ -1,63 +1,67 @@
+from collections import Counter
+from commands.commit import head_equals_to_index, index_tree_found_in_flat_tree_object
+from index_entry import IndexEntry
 from registry import register
-from repo import Repository
-from util.command_utils import find_by_path, get_head_commit_index_path
-from util.file_util import FileUtil
-import os
+from repo import get_all_work_files, get_flat_tree_object, get_index_entries
+from util.command_utils import find_by_path
 
 
 @register("status")
 def status_command(args, staged):
-    repository = Repository()
-    storage_full_path = os.path.join(repository.work_dir(), repository.storage_dir())
-    index_file_path = os.path.join(storage_full_path, repository.index())
-    index_entries = FileUtil.parse_index_file_lines(index_file_path)
-    all_working_files = FileUtil.list_all_files_rec(repository.work_dir(), repository.storage_dir())
-    work_file_entries = FileUtil.transform_paths_to_entries(all_working_files)
-    changes_found = False
+
+    work_file_entries: list[IndexEntry] = get_all_work_files()
+    print(f"All work files size:{len(work_file_entries)}")
+    index_entries: list[IndexEntry] = get_index_entries()
+    print(f"Index entries size:{len(index_entries)}. Are sets differs: {compare_index_sets(index_entries, work_file_entries)}")
     # 1. work dir vs staging area
     print("1. Changes to be staged. (Work dir vs staging area check)")
-    for wfe in work_file_entries:
-        if wfe not in index_entries:
-            index_entry = find_by_path(index_entries, wfe.path)
-            if index_entry:
-                print(f"\tModified: {index_entry.path}")
-            else:
-                print(f"\tUntracked (new): {wfe.path}")
-            changes_found = True
-
-    for ie in index_entries:
-        if ie not in work_file_entries:
-            wd_entry = find_by_path(work_file_entries, ie.path)
-            if not wd_entry:
-                print(f"\tDeleted: {ie.path}")
-                changes_found = True
-    if not changes_found:
-        print("\tNo changes")
-
-    # 2. staging area vs latest commit
-    print("2. Changes to be commited. (Staging area vs latest commit check)")
-
-    prev_commit_index_path = get_head_commit_index_path(repository)
-    if prev_commit_index_path:
-        changes_found = False
-        prev_index_entries = FileUtil.parse_index_file_lines(prev_commit_index_path)
-        for pie in prev_index_entries:
-            if pie not in index_entries:
-                index_entry = find_by_path(index_entries, pie.path)
+    if not compare_index_sets(index_entries, work_file_entries):
+        print("\tNo changes to be staged")
+    else:
+        for wfe in work_file_entries:
+            if wfe not in index_entries:
+                index_entry = find_by_path(index_entries, wfe.path)
                 if index_entry:
-                    print(f"\tmodified: {index_entry.path}")
+                    print(f"\tModified: {index_entry.path}")
                 else:
-                    print(f"\tdeleted: {pie.path}")
+                    print(f"\tUntracked (new): {wfe.path}")
                 changes_found = True
 
         for ie in index_entries:
-            if ie not in prev_index_entries:
-                pv_entry = find_by_path(prev_index_entries, ie.path)
-                if not pv_entry:
-                    print(f"\tnew file: {ie.path}")
+            if ie not in work_file_entries:
+                wd_entry = find_by_path(work_file_entries, ie.path)
+                if not wd_entry:
+                    print(f"\tDeleted: {ie.path}")
                     changes_found = True
-        if not changes_found:
+
+    # 2. staging area vs head commit
+    print("2. Changes to be commited. (Staging area vs latest commit check)")
+    # prev_commit_index_path = get_head_commit_index_path(repository)
+    flat_head_tree: list[dict[str, str]] = get_flat_tree_object()
+    if flat_head_tree:
+        if head_equals_to_index(flat_head_tree, index_entries):
             print(f"\tNothing to commit")
+        else:
+            for blob in flat_head_tree:
+                entry = find_by_path(index_entries, blob.get("name"))
+                if entry:
+                    if entry.sha1 != blob.get("hash"):
+                        print(f"\tmodified: {index_entry.path}")
+                else:
+                    print(f"\tdeleted: {blob.get("name")}")
+                # if blob not in index_entries:
+                #     index_entry = find_by_path(index_entries, blob.get("name"))
+                #     if index_entry:
+                #         print(f"\tmodified: {index_entry.path}")
+                #     else:
+                #         print(f"\tdeleted: {pie.path}")
+
+            for entry in index_entries:
+                if not index_tree_found_in_flat_tree_object(entry, flat_head_tree):
+                    blob = find_by_path_in_flat_tree(flat_head_tree, entry.path)
+                    if not blob:
+                        print(f"\tnew file: {entry.path}")
+
     else:
         if index_entries:
             print("\tChanges to be committed (from staging area). No commits yet")
@@ -65,3 +69,11 @@ def status_command(args, staged):
                 print(f"\t\t{ie.path}")
         else:
             print("\tNo commits yet. Nothing in staged area and nothing to commit")
+
+
+def find_by_path_in_flat_tree(flat_tree: list[dict[str, str]], name: str) -> dict[str, str]:
+    return next((blob for blob in flat_tree if blob.get("name") == name), None)
+
+
+def compare_index_sets(first: list[IndexEntry], second: list[IndexEntry]) -> bool:
+    return Counter(first) != Counter(second)

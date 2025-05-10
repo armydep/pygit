@@ -148,18 +148,6 @@ class FileUtil:
         return ts_list
 
     @staticmethod
-    def build_index_entry(abs_path: str, rel_path: str) -> IndexEntry:
-        sha1 = FileUtil.sha1_of_file(abs_path)
-        file_stat = os.stat(abs_path)
-        mod_time = file_stat.st_mtime_ns
-        size = file_stat.st_size
-        stage_num = 0
-        return IndexEntry(rel_path, sha1, mod_time, size, stage_num)
-
-    def transform_paths_to_entries(paths: list[str]) -> list[IndexEntry]:
-        return list(map(FileUtil.build_index_entry, paths))
-
-    @staticmethod
     def clear_dir(path: str) -> None:
         if not os.path.isdir(path):
             raise ValueError(f"{path} is not a directory")

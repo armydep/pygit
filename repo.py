@@ -1,7 +1,9 @@
 import os
 
+from index_entry import IndexEntry
 from model.commit_object import CommitObject
-from model.tree_object import TreeObject
+
+# from model.tree_object import TreeObject
 from util.file_util import FileUtil
 
 
@@ -25,8 +27,16 @@ def get_head_path() -> str:
     return os.path.join(get_storage_root(), head())
 
 
+def work_dir_name() -> str:
+    return "work_dir"
+
+
+def workdir_home() -> str:
+    return "/home/duser/projects/git-pygit/"
+
+
 def get_work_dir() -> str:
-    return os.path.join("/home/duser/projects/git-pygit/work_dir")
+    return os.path.join(workdir_home(), work_dir_name())
 
 
 def get_default_branch_ref() -> str:
@@ -150,3 +160,30 @@ def tree_object_by_hash(commit_tree_hash: str) -> list[dict[str, str]]:
         base_blobs.append({"mode": mode, "type": type_, "hash": hash_, "name": name})
 
     return base_blobs
+
+
+def get_all_work_files() -> list[IndexEntry]:
+    all_working_files = FileUtil.list_all_files_rec(get_work_dir(), storage_dir())
+    return transform_paths_to_entries(all_working_files)
+
+
+def get_index_entries() -> list[IndexEntry]:
+    return FileUtil.parse_index_file_lines(get_index_file_path())
+
+
+def build_index_entry(abs_path: str) -> IndexEntry:
+    # _, _, rel_path = abs_path.partition(work_dir_name())
+    # rel_path = "/p1" + tail
+    # rel_path = os.path.basename(abs_path)
+    tail = abs_path.removeprefix(get_work_dir())
+    rel_path = tail.lstrip("/")
+    sha1 = FileUtil.sha1_of_file(abs_path)
+    file_stat = os.stat(abs_path)
+    mod_time = file_stat.st_mtime_ns
+    size = file_stat.st_size
+    stage_num = 0
+    return IndexEntry(rel_path, sha1, mod_time, size, stage_num)
+
+
+def transform_paths_to_entries(paths: list[str]) -> list[IndexEntry]:
+    return list(map(build_index_entry, paths))

@@ -1,6 +1,6 @@
 import os
 from registry import register
-from repo import convert_file_to_work_dir_path, get_index_file_path, get_path_in_objects, get_storage_root
+from repo import build_index_entry, convert_file_to_work_dir_path, get_index_file_path, get_path_in_objects, get_storage_root
 from util.command_utils import find_by_path
 from util.file_util import FileUtil, IndexEntry
 import traceback
@@ -60,7 +60,7 @@ def add_single_file(args, staged) -> None:
             index_entries = FileUtil.parse_index_file_lines(index_file_path)
             entry_from_index = find_by_path(index_entries, args[0])
             if is_target_exist_in_work_dir:
-                target_index_entry = FileUtil.build_index_entry(target_file, args[0])
+                target_index_entry = build_index_entry(target_file)
                 print(f"Target file index entry: {target_index_entry}")
                 if entry_from_index:  # entry in index and in work dir. check if it equals or modified
                     if target_index_entry == entry_from_index:
