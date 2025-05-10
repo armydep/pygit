@@ -8,7 +8,6 @@ from repo import (
     get_index_file_path,
     get_path_in_objects,
     get_storage_root,
-    get_work_dir,
     overwrite_index_file,
 )
 from util.file_util import FileUtil, IndexEntry
@@ -32,11 +31,7 @@ def add_command(args, staged):
             if wfe not in index_entries:
                 untracked_set.add(wfe)
         untracked_path_set = set()
-        # abs_path = "/tmp/pygit/repo_work_dir_root/"
         for f in untracked_set:
-            # rel_path = f.path[len(get_work_dir()) + 1 :]
-            # print(f"Add. orig: {f.path}. result: {rel_path}")
-            # untracked_path_set.add(rel_path)
             untracked_path_set.add(f.path)
         for f in untracked_path_set:
             print(f"Untracked set entry: {f}")
