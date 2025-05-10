@@ -1,8 +1,5 @@
-import os
 from registry import register
-from repo import Repository
-from util.command_utils import at_least_one_commit_exist, get_active_branch, get_head, list_branches
-from util.file_util import FileUtil
+from repo import create_head_commit_ref_for_branch, get_active_branch_name, get_head_hash, list_branches
 
 
 @register("branch")
@@ -13,26 +10,21 @@ def branch_command(args, stgaded):
     Args: branch name. Optional
     Returns: nothing
     """
-    repository = Repository()
-    branches: list[str] = list_branches(repository)
-    if len(args) == 1 and is_valid_identifier(args[0]) and args[0] not in branches:
-        head = get_head(repository)
-        if head:  # at_least_one_commit_exist
-            parent = ""
-            branch_path = os.path.join(repository.work_dir(), repository.storage_dir(), repository.branches(), args[0])
-            FileUtil.create_dir_if_not_exist(branch_path)
-            # created /wd/.storage/branches/new branch
-
-            branch_head_path = os.path.join(branch_path, repository.head())
-            # current head >  /wd/.storage/branches/new branch/parent
-            FileUtil.write_lines_to_file(branch_head_path, parent)
-            branches.append(args[0])
-            print("Created")
+    branches: list[str] = list_branches()
+    if not branches:
+        print("[branch] No commits yet. No branches")
+        return
+    active_branch = get_active_branch_name()
+    if len(args) == 1:
+        if is_valid_branch_name(args[0]) and args[0] not in branches:
+            head_hash = get_head_hash()
+            create_head_commit_ref_for_branch(head_hash, args[0])
+            print(f"[branch] Created. head hash: {head_hash}")
         else:
-            print("Create at least one commit before creating a new branch")
+            print(f"[branch] Invalid branch name: {args[0]}")
+        return
 
     print(f"[branch]")
-    active_branch = get_active_branch(repository)
     for b in branches:
         if active_branch == b:
             print(f"\t{b} *")
@@ -40,5 +32,5 @@ def branch_command(args, stgaded):
             print(f"\t{b}")
 
 
-def is_valid_identifier(s1: str) -> bool:
-    return bool(s1) and s1.isalnum() and not s1[0].isdigit()
+def is_valid_branch_name(arg: str) -> bool:
+    return bool(arg) and arg.isalnum() and not arg[0].isdigit() and len(arg) > 2

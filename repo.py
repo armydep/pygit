@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 from index_entry import IndexEntry
 from model.commit_object import CommitObject
@@ -79,9 +80,25 @@ def objects() -> str:
     return "objects"
 
 
+def get_active_branch_name() -> str:
+    active_branch_ref_content = get_active_branch_ref_content()
+    return _extract_branch_name(active_branch_ref_content)
+
+
 def create_head_commit_ref(commit_hash) -> None:
-    head_content = FileUtil.read_file_content(get_head_path())
-    branch_name = _extract_branch_name(head_content)
+    branch_name = get_active_branch_name()
+    create_head_commit_ref_for_branch(commit_hash, branch_name)
+
+
+def get_active_branch_ref_content() -> str:
+    return FileUtil.read_file_content(get_head_path())
+
+
+def get_head_hash() -> str:
+    return FileUtil.read_file_content(_head_commit_hash_path(get_active_branch_name()))
+
+
+def create_head_commit_ref_for_branch(commit_hash: str, branch_name: str) -> None:
     path = os.path.join(get_refs_heads_path(), branch_name)
     print(f"Branch head create in: {path}. {commit_hash}")
     FileUtil.create_file_with_dir(path, commit_hash + "\n")
@@ -99,33 +116,35 @@ def _head_commit_hash_path(branch) -> str:
     return os.path.join(get_refs_heads_path(), branch)
 
 
+def list_branches() -> list[str]:
+    branches_path = os.path.join(get_refs_heads_path())
+    return [f.name for f in Path(branches_path).iterdir() if f.is_file()]
+
+
 def get_flat_tree_object() -> list[dict[str, str]]:
-    print("tree entries")
+    # print("tree entries")
     # 1
-    head_content = FileUtil.read_file_content(get_head_path())
-    print(f"Head content: {head_content}")
-    # 2
-    branch_name = _extract_branch_name(head_content)
-    print(f"Branch name: {branch_name}")
+    branch_name = get_active_branch_name()
+    # print(f"Branch name: {branch_name}")
     # 3
     if not FileUtil.is_file_exist(_head_commit_hash_path(branch_name)):
-        print(f"No commits yet on branch. No head commit. ref path: {_head_commit_hash_path(branch_name)}")
+        # print(f"No commits yet on branch. No head commit. ref path: {_head_commit_hash_path(branch_name)}")
         return None
 
     head_commit_hash = FileUtil.read_file_content(_head_commit_hash_path(branch_name))
-    print(f"Head commit hash: {head_commit_hash}. ref path:{_head_commit_hash_path(branch_name)}")
+    # print(f"Head commit hash: {head_commit_hash}. ref path:{_head_commit_hash_path(branch_name)}")
 
     commit_object_path = get_path_in_objects(head_commit_hash)
-    print(f"Commit object path: {commit_object_path}")
+    # print(f"Commit object path: {commit_object_path}")
     commit_object_content_lines = FileUtil.read_lines_from_file(commit_object_path)
     commit_object: CommitObject = CommitObject.from_string(commit_object_content_lines)
     commit_tree_hash = commit_object.tree_hash
-    print(f"Tree hash: {commit_tree_hash}")
+    # print(f"Tree hash: {commit_tree_hash}")
 
     tree_object: list[dict[str, str]] = flatten_tree_object_rec(commit_tree_hash)
-    print("Tree flat blobs list built")
-    for blob in tree_object:
-        print(f"\t{blob}")
+    # print("Tree flat blobs list built")
+    # for blob in tree_object:
+    #     print(f"\t{blob}")
     return tree_object
 
 
@@ -148,9 +167,9 @@ def flatten_tree_object_rec(tree_hash: str, dirname: str = "") -> list[dict[str,
 
 
 def tree_object_by_hash(commit_tree_hash: str) -> list[dict[str, str]]:
-    print(f"Tree hash: {commit_tree_hash}")
+    # print(f"Tree hash: {commit_tree_hash}")
     tree_object_path = get_path_in_objects(commit_tree_hash)
-    print(f"Tree object path: {tree_object_path}")
+    # print(f"Tree object path: {tree_object_path}")
     tree_object_content = FileUtil.read_lines_from_file(tree_object_path)
 
     base_blobs: list[dict[str, str]] = []
@@ -168,13 +187,12 @@ def get_all_work_files() -> list[IndexEntry]:
 
 
 def get_index_entries() -> list[IndexEntry]:
+    if not FileUtil.is_file_exist(get_index_file_path()):
+        return []
     return FileUtil.parse_index_file_lines(get_index_file_path())
 
 
 def build_index_entry(abs_path: str) -> IndexEntry:
-    # _, _, rel_path = abs_path.partition(work_dir_name())
-    # rel_path = "/p1" + tail
-    # rel_path = os.path.basename(abs_path)
     tail = abs_path.removeprefix(get_work_dir())
     rel_path = tail.lstrip("/")
     sha1 = FileUtil.sha1_of_file(abs_path)

@@ -113,11 +113,6 @@ def find_by_path(entries: list[IndexEntry], path: str) -> IndexEntry:
 #     return Counter(first) != Counter(second)
 
 
-# def list_branches(repository: Repository) -> list[str]:
-#     branches_path = os.path.join(repository.work_dir(), repository.storage_dir(), repository.branches())
-#     return [entry.name for entry in os.scandir(branches_path) if entry.is_dir()]
-
-
 # def get_active_branch(repository: Repository) -> str:
 #     active_branch_path = os.path.join(repository.work_dir(), repository.storage_dir(), repository.active_branch())
 #     return FileUtil.read_file_content(active_branch_path)
