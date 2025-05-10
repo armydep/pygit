@@ -26,16 +26,8 @@ def get_head_file_path() -> str:
     return os.path.join(get_storage_root(), head())
 
 
-def work_dir_name() -> str:
-    return "work_dir"
-
-
-def workdir_home() -> str:
-    return "/home/duser/projects/git-pygit/"
-
-
 def get_work_dir() -> str:
-    return os.path.join(workdir_home(), work_dir_name())
+    return os.getcwd()
 
 
 def build_default_branch_ref() -> str:
