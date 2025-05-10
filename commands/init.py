@@ -1,11 +1,10 @@
 from repo import (
-    get_default_branch_ref,
-    get_head_path,
-    get_index_file_path,
+    build_default_branch_ref,
     get_objects_path,
     get_refs_heads_path,
     get_storage_root,
     get_work_dir,
+    update_head_ref_to_branch,
 )
 from util.file_util import FileUtil
 from registry import register
@@ -41,8 +40,8 @@ def init_command(args, staged):
         FileUtil.create_dir_if_not_exist(get_objects_path())
 
         # 5 create HEAD - refs/heads/<main br>
-        head_path = get_head_path()
-        FileUtil.overwrite_file(head_path, get_default_branch_ref())
+        update_head_ref_to_branch(build_default_branch_ref())
+
         print(f"init done. root: {get_work_dir()}")
 
     except Exception as e:

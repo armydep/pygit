@@ -112,6 +112,12 @@ class FileUtil:
                 shutil.copy2(src, dst)
 
     @staticmethod
+    def copy_file(src_path: str, dest_path: str) -> None:
+        dest_dir = os.path.dirname(dest_path)
+        os.makedirs(dest_dir, exist_ok=True)
+        shutil.copy2(src_path, dest_path)
+
+    @staticmethod
     def list_dir_non_recursive_with_exclude(path: str, exc: str) -> list[str]:
         return [os.path.join(path, entry) for entry in os.listdir(path) if entry != exc]
 
@@ -169,3 +175,7 @@ class FileUtil:
                 shutil.rmtree(entry_path)
             else:
                 os.remove(entry_path)
+
+    @staticmethod
+    def delete_file(abs_path: str) -> None:
+        os.remove(abs_path)

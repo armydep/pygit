@@ -3,8 +3,6 @@ from pathlib import Path
 
 from index_entry import IndexEntry
 from model.commit_object import CommitObject
-
-# from model.tree_object import TreeObject
 from util.file_util import FileUtil
 
 
@@ -24,7 +22,7 @@ def get_objects_path() -> str:
     return os.path.join(get_storage_root(), objects())
 
 
-def get_head_path() -> str:
+def get_head_file_path() -> str:
     return os.path.join(get_storage_root(), head())
 
 
@@ -40,8 +38,12 @@ def get_work_dir() -> str:
     return os.path.join(workdir_home(), work_dir_name())
 
 
-def get_default_branch_ref() -> str:
-    return "ref: " + os.path.join(refs(), heads(), default_branch())
+def build_default_branch_ref() -> str:
+    return build_branch_ref(default_branch())
+
+
+def build_branch_ref(branch: str) -> str:
+    return "ref: " + os.path.join(refs(), heads(), branch)
 
 
 def convert_file_to_work_dir_path(file: str) -> str:
@@ -91,7 +93,11 @@ def create_head_commit_ref(commit_hash) -> None:
 
 
 def get_active_branch_ref_content() -> str:
-    return FileUtil.read_file_content(get_head_path())
+    return FileUtil.read_file_content(get_head_file_path())
+
+
+def update_head_ref_to_branch(branch_ref) -> str:
+    FileUtil.overwrite_file(get_head_file_path(), branch_ref)
 
 
 def get_head_hash() -> str:
@@ -121,30 +127,21 @@ def list_branches() -> list[str]:
     return [f.name for f in Path(branches_path).iterdir() if f.is_file()]
 
 
-def get_flat_tree_object() -> list[dict[str, str]]:
-    # print("tree entries")
-    # 1
+def get_active_branch_head_flat_tree_object() -> list[dict[str, str]]:
     branch_name = get_active_branch_name()
-    # print(f"Branch name: {branch_name}")
-    # 3
+    return get_head_flat_tree_object_by_branch(branch_name)
+
+
+def get_head_flat_tree_object_by_branch(branch_name: str) -> list[dict[str, str]]:
     if not FileUtil.is_file_exist(_head_commit_hash_path(branch_name)):
-        # print(f"No commits yet on branch. No head commit. ref path: {_head_commit_hash_path(branch_name)}")
         return None
 
     head_commit_hash = FileUtil.read_file_content(_head_commit_hash_path(branch_name))
-    # print(f"Head commit hash: {head_commit_hash}. ref path:{_head_commit_hash_path(branch_name)}")
-
     commit_object_path = get_path_in_objects(head_commit_hash)
-    # print(f"Commit object path: {commit_object_path}")
     commit_object_content_lines = FileUtil.read_lines_from_file(commit_object_path)
     commit_object: CommitObject = CommitObject.from_string(commit_object_content_lines)
     commit_tree_hash = commit_object.tree_hash
-    # print(f"Tree hash: {commit_tree_hash}")
-
     tree_object: list[dict[str, str]] = flatten_tree_object_rec(commit_tree_hash)
-    # print("Tree flat blobs list built")
-    # for blob in tree_object:
-    #     print(f"\t{blob}")
     return tree_object
 
 
@@ -205,3 +202,34 @@ def build_index_entry(abs_path: str) -> IndexEntry:
 
 def transform_paths_to_entries(paths: list[str]) -> list[IndexEntry]:
     return list(map(build_index_entry, paths))
+
+
+# def convert_flat_tree_to_index(flat_head_tree: list[dict[str, str]]) -> list[IndexEntry]:
+#     index = []
+#     for blob in flat_head_tree:
+#         abs_path = get_path_in_objects(blob.get("hash"))
+#         entry: IndexEntry = build_index_entry(abs_path)
+#         index.append(entry)
+
+
+#  build_index_entry(abs_path: str) -> IndexEntry:
+# path
+# sha1
+# mod_time
+# size,
+# stage_num
+
+
+def overwrite_index_file(index_entries: list[IndexEntry]) -> None:
+    FileUtil.update_index_file(get_index_file_path(), index_entries)
+
+
+def copy_object_to_work_dir(name: str, hash: str) -> None:
+    src_ = get_path_in_objects(hash)
+    dest_path = os.path.join(get_work_dir(), name)
+    FileUtil.copy_file(src_, dest_path)
+    return dest_path
+
+
+def delete_work_dir_file(rel_path: str) -> None:
+    FileUtil.delete_file(os.path.join(get_work_dir(), rel_path))

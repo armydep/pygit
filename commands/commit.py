@@ -4,7 +4,7 @@ import time
 from index_entry import IndexEntry
 from repo import (
     create_head_commit_ref,
-    get_flat_tree_object,
+    get_active_branch_head_flat_tree_object,
     get_index_file_path,
     get_path_in_objects,
     get_storage_root,
@@ -33,7 +33,7 @@ def commit_command(args, staged):
     print("[commit] 3")
     index_entries = FileUtil.parse_index_file_lines(index_file_path)
     print(f"[commit] 4. index_entries: {index_entries}")
-    flat_head_tree: list[dict[str, str]] = get_flat_tree_object()
+    flat_head_tree: list[dict[str, str]] = get_active_branch_head_flat_tree_object()
     print(f"[commit] 4. tree_object: {flat_head_tree}")
     if flat_head_tree:
         print(f"[commit] 5. Head tree exists")

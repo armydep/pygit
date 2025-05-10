@@ -2,7 +2,7 @@ from collections import Counter
 from commands.commit import head_equals_to_index, index_tree_found_in_flat_tree_object
 from index_entry import IndexEntry
 from registry import register
-from repo import get_all_work_files, get_flat_tree_object, get_index_entries, get_storage_root
+from repo import get_all_work_files, get_active_branch_head_flat_tree_object, get_index_entries, get_storage_root
 from util.command_utils import find_by_path
 from util.file_util import FileUtil
 
@@ -10,8 +10,8 @@ from util.file_util import FileUtil
 @register("status")
 def status_command(args, staged):
     if not FileUtil.is_dir_exist(get_storage_root()):
-            print("The work dir is not a git repository. Missing .git directory")
-            return
+        print("The work dir is not a git repository. Missing .git directory")
+        return
     work_file_entries: list[IndexEntry] = get_all_work_files()
     print(f"All work files size:{len(work_file_entries)}")
     index_entries: list[IndexEntry] = get_index_entries()
@@ -37,7 +37,7 @@ def status_command(args, staged):
 
     # 2. staging area vs head commit
     print("2. Changes to be commited. (Staging area vs latest commit check)")
-    flat_head_tree: list[dict[str, str]] = get_flat_tree_object()
+    flat_head_tree: list[dict[str, str]] = get_active_branch_head_flat_tree_object()
     if flat_head_tree:
         if head_equals_to_index(flat_head_tree, index_entries):
             print(f"\tNothing to commit")

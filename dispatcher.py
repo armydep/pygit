@@ -5,10 +5,10 @@ from commands import add
 from commands import commit
 from commands import status
 from commands import branch
+from commands import switch
 
 # from commands import restore
 # from commands import merge
-# from commands import switch
 
 
 def dispatch(args, staged=False):
