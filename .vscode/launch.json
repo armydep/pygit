@@ -8,7 +8,12 @@
             "request": "launch",
             "program": "main.py",
             "console": "integratedTerminal",
-            "args": ["add", "google/code/findbugs/jsr305/2.0.1/_remote.repositories"]
+            "args": ["add", "."],
+            "env": {
+              "wdir": "/home/duser/projects/git-pygit/work_dir"
+            }
+            // "cwd": "/home/duser/projects/git-pygit/work_dir"
+            // "args": ["add", "google/code/findbugs/jsr305/2.0.1/_remote.repositories"]
             // ["abc.tx"]
             // "args": "${command:pickArgs}"
         }

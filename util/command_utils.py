@@ -1,15 +1,10 @@
-import os
+# import os
 
-# from repo import Repository
-from util.file_util import FileUtil, IndexEntry
-from collections import Counter
+# # from repo import Repository
+# from util.file_util import FileUtil, IndexEntry
+# from collections import Counter
 
 
-def find_by_path(entries: list[IndexEntry], path: str) -> IndexEntry:
-    for entry in entries:
-        if entry.path == path:
-            return entry
-    return None
 
 
 # # branches/active_branch/top_commit/objects path

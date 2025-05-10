@@ -2,8 +2,7 @@ from collections import Counter
 from commands.commit import head_equals_to_index, index_tree_found_in_flat_tree_object
 from index_entry import IndexEntry
 from registry import register
-from repo import get_all_work_files, get_active_branch_head_flat_tree_object, get_index_entries, get_storage_root
-from util.command_utils import find_by_path
+from repo import find_by_path, get_all_work_files, get_active_branch_head_flat_tree_object, get_index_entries, get_storage_root
 from util.file_util import FileUtil
 
 

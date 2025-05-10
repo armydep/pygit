@@ -14,7 +14,6 @@ from repo import (
     overwrite_index_file,
     update_head_ref_to_branch,
 )
-from util.file_util import FileUtil
 
 
 @register("switch")
@@ -45,12 +44,7 @@ def switch_command(args, stgaded):
 
 
 def switch(switch_to: str) -> None:
-    # 2. update index
     flat_head_tree: list[dict[str, str]] = get_head_flat_tree_object_by_branch(switch_to)
-    # index_entries: list[IndexEntry] = convert_flat_tree_to_index(flat_head_tree)
-    # overwrite_index_file(index_entries)
-    # 3 update work dir
-    # get_all_work_files
     index_entries: list[IndexEntry] = get_index_entries()
     for entry in index_entries:
         delete_work_dir_file(entry.path)
@@ -60,7 +54,6 @@ def switch(switch_to: str) -> None:
         entry: IndexEntry = build_index_entry(abs_path)
         next_index_entries.append(entry)
     overwrite_index_file(next_index_entries)
-    # 1
     update_head_ref_to_branch(build_branch_ref(switch_to))
 
 

@@ -27,6 +27,8 @@ def get_head_file_path() -> str:
 
 
 def get_work_dir() -> str:
+    if os.getenv("wdir"):
+        return os.getenv("wdir")
     return os.getcwd()
 
 
@@ -156,9 +158,7 @@ def flatten_tree_object_rec(tree_hash: str, dirname: str = "") -> list[dict[str,
 
 
 def tree_object_by_hash(commit_tree_hash: str) -> list[dict[str, str]]:
-    # print(f"Tree hash: {commit_tree_hash}")
     tree_object_path = get_path_in_objects(commit_tree_hash)
-    # print(f"Tree object path: {tree_object_path}")
     tree_object_content = FileUtil.read_lines_from_file(tree_object_path)
 
     base_blobs: list[dict[str, str]] = []
@@ -204,14 +204,6 @@ def transform_paths_to_entries(paths: list[str]) -> list[IndexEntry]:
 #         index.append(entry)
 
 
-#  build_index_entry(abs_path: str) -> IndexEntry:
-# path
-# sha1
-# mod_time
-# size,
-# stage_num
-
-
 def overwrite_index_file(index_entries: list[IndexEntry]) -> None:
     FileUtil.update_index_file(get_index_file_path(), index_entries)
 
@@ -225,3 +217,10 @@ def copy_object_to_work_dir(name: str, hash: str) -> None:
 
 def delete_work_dir_file(rel_path: str) -> None:
     FileUtil.delete_file(os.path.join(get_work_dir(), rel_path))
+
+
+def find_by_path(entries: list[IndexEntry], path: str) -> IndexEntry:
+    for entry in entries:
+        if entry.path == path:
+            return entry
+    return None

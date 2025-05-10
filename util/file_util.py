@@ -18,20 +18,11 @@ class FileUtil:
     @staticmethod
     def create_dir_if_not_exist(dir_path) -> bool:
         os.makedirs(dir_path)
-        # try:
-        #     os.makedirs(dir_path)
-        #     return 1
-        # except FileExistsError:
-        #     return 0
 
     @staticmethod
     def create_file_and_write(abs_path: str, content: str) -> bool:
-        # parent_dir = os.path.dirname(abs_path)
-        # os.makedirs(parent_dir, exist_ok=True)
-        # Write content to the file
         with open(abs_path, "w") as f:
             f.write(content)
-        # print(f"Written to {abs_path}")
 
     @staticmethod
     def list_all_files_rec(dir_path: str, exclude_name: str) -> list[str]:
@@ -90,8 +81,6 @@ class FileUtil:
         if not os.path.exists(orig_file):
             raise FileNotFoundError(f"Source path does not exist: {orig_file}")
 
-        # os.makedirs(target_dir, exist_ok=True)  # Ensure target directory exists
-
         if os.path.isdir(orig_file):
             # Copy directory into target directory (recursively)
             dest = os.path.join(target_dir, os.path.basename(orig_file))
@@ -102,7 +91,6 @@ class FileUtil:
 
     @staticmethod
     def copy_dir_contents(d1: str, d2: str) -> None:
-        # os.makedirs(d2, exist_ok=True)  # Ensure d2 exists
         for item in os.listdir(d1):
             src = os.path.join(d1, item)
             dst = os.path.join(d2, item)

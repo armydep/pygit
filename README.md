@@ -154,3 +154,8 @@ git cat-file -p 07fbb54a88b2d5297ebbd4609eb9f748bd838208
 100644 blob 1a52584b7fb352fc19c3b1937cddc22015308c38	sec.txt
 ```
 
+- Next:
+ - add branch name to status
+ - convert flat tree object into TreeObject with decorator
+ - set validation step to all commands. .git exists. add 
+ - move head_equals_to_index to util
