@@ -45,7 +45,7 @@ def status_command(args, staged):
                 entry = find_by_path(index_entries, blob.get("name"))
                 if entry:
                     if entry.sha1 != blob.get("hash"):
-                        print(f"\tmodified: {index_entry.path}")
+                        print(f"\tmodified: {entry.path}")
                 else:
                     print(f"\tdeleted: {blob.get("name")}")
 
