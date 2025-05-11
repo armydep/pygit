@@ -2,36 +2,10 @@ import os
 import shutil
 import hashlib
 
-# from commands.add import IndexEntry
-
-
-class IndexEntry:
-    def __init__(self, path: str, sha1: str, mod_time: int, size: int):
-        self.path = path
-        self.sha1 = sha1
-        self.mod_time = mod_time
-        self.size = size
-
-    def __eq__(self, other):
-        return isinstance(other, IndexEntry) and self.path == other.path and self.sha1 == other.sha1 and self.size == other.size
-
-    def __hash__(self):
-        return hash((self.path, self.sha1, self.size))
-
-    def __str__(self):
-        return f"{self.path}|{self.sha1}|{self.mod_time}|{self.size}"
-
-    @classmethod
-    def from_string(cls, line: str):
-        path, sha1, mod_time_str, size_str = line.split("|")
-        return cls(path, sha1, int(mod_time_str), int(size_str))
+from index_entry import IndexEntry
 
 
 class FileUtil:
-
-    # @staticmethod
-    # def is_dir_exist(path) -> bool:
-    #     return 1
 
     @staticmethod
     def is_file_exist(file_path) -> bool:
@@ -44,20 +18,11 @@ class FileUtil:
     @staticmethod
     def create_dir_if_not_exist(dir_path) -> bool:
         os.makedirs(dir_path)
-        # try:
-        #     os.makedirs(dir_path)
-        #     return 1
-        # except FileExistsError:
-        #     return 0
 
     @staticmethod
     def create_file_and_write(abs_path: str, content: str) -> bool:
-        # parent_dir = os.path.dirname(abs_path)
-        # os.makedirs(parent_dir, exist_ok=True)
-        # Write content to the file
         with open(abs_path, "w") as f:
             f.write(content)
-        # print(f"Written to {abs_path}")
 
     @staticmethod
     def list_all_files_rec(dir_path: str, exclude_name: str) -> list[str]:
@@ -87,17 +52,23 @@ class FileUtil:
             f.write(str1 + "\n")
 
     @staticmethod
+    def create_file_with_dir(file_path: str, content: str) -> None:
+        dir_path = os.path.dirname(file_path)
+        os.makedirs(dir_path, exist_ok=True)
+        with open(file_path, "w", encoding="utf-8") as f:
+            f.write(content)
+
+    @staticmethod
     def update_index_file(file_path: str, lines: list[IndexEntry]) -> None:
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
         with open(file_path, "w") as f:
             for line in lines:
                 f.write(str(line) + "\n")
-                # print(f">{line}")
 
     @staticmethod
     def add_file_to_objects(orig_file: str, target_dir: str) -> None:
-        if not os.path.isdir(target_dir):
-            os.makedirs(target_dir)
+        dest_dir = os.path.dirname(target_dir)
+        os.makedirs(dest_dir, exist_ok=True)
         shutil.copy2(orig_file, target_dir)
 
     @staticmethod
@@ -110,8 +81,6 @@ class FileUtil:
         if not os.path.exists(orig_file):
             raise FileNotFoundError(f"Source path does not exist: {orig_file}")
 
-        # os.makedirs(target_dir, exist_ok=True)  # Ensure target directory exists
-
         if os.path.isdir(orig_file):
             # Copy directory into target directory (recursively)
             dest = os.path.join(target_dir, os.path.basename(orig_file))
@@ -122,7 +91,6 @@ class FileUtil:
 
     @staticmethod
     def copy_dir_contents(d1: str, d2: str) -> None:
-        # os.makedirs(d2, exist_ok=True)  # Ensure d2 exists
         for item in os.listdir(d1):
             src = os.path.join(d1, item)
             dst = os.path.join(d2, item)
@@ -130,6 +98,12 @@ class FileUtil:
                 shutil.copytree(src, dst, dirs_exist_ok=True)
             else:
                 shutil.copy2(src, dst)
+
+    @staticmethod
+    def copy_file(src_path: str, dest_path: str) -> None:
+        dest_dir = os.path.dirname(dest_path)
+        os.makedirs(dest_dir, exist_ok=True)
+        shutil.copy2(src_path, dest_path)
 
     @staticmethod
     def list_dir_non_recursive_with_exclude(path: str, exc: str) -> list[str]:
@@ -163,19 +137,33 @@ class FileUtil:
         with open(file_path, "r") as f:
             for line in f:
                 line = line.strip()
-                if line:  # skip empty lines
-                    # tokens = line.split("|")
+                if line:
                     ts_list.append(IndexEntry.from_string(line))
         return ts_list
 
     @staticmethod
-    def build_index_entry(file_path: str) -> IndexEntry:
-        path = file_path
-        sha1 = FileUtil.sha1_of_file(file_path)
-        file_stat = os.stat(file_path)
-        mod_time = file_stat.st_mtime_ns
-        size = file_stat.st_size
-        return IndexEntry(path, sha1, mod_time, size)
+    def clear_dir(path: str) -> None:
+        if not os.path.isdir(path):
+            raise ValueError(f"{path} is not a directory")
 
-    def transform_paths_to_entries(paths: list[str]) -> list[IndexEntry]:
-        return list(map(FileUtil.build_index_entry, paths))
+        for entry in os.listdir(path):
+            full_path = os.path.join(path, entry)
+            if os.path.isdir(full_path):
+                shutil.rmtree(full_path)
+            else:
+                os.remove(full_path)
+
+    @staticmethod
+    def delete_all_except(p1: str, f1: str) -> None:
+        for entry in os.listdir(p1):
+            entry_path = os.path.join(p1, entry)
+            if entry == f1:
+                continue  # Skip the file to preserve
+            if os.path.isdir(entry_path):
+                shutil.rmtree(entry_path)
+            else:
+                os.remove(entry_path)
+
+    @staticmethod
+    def delete_file(abs_path: str) -> None:
+        os.remove(abs_path)
