@@ -6,8 +6,8 @@ from commands import commit
 from commands import status
 from commands import branch
 from commands import switch
+from commands import restore
 
-# from commands import restore
 # from commands import merge
 
 

@@ -196,23 +196,13 @@ def transform_paths_to_entries(paths: list[str]) -> list[IndexEntry]:
     return list(map(build_index_entry, paths))
 
 
-# def convert_flat_tree_to_index(flat_head_tree: list[dict[str, str]]) -> list[IndexEntry]:
-#     index = []
-#     for blob in flat_head_tree:
-#         abs_path = get_path_in_objects(blob.get("hash"))
-#         entry: IndexEntry = build_index_entry(abs_path)
-#         index.append(entry)
-
-
 def overwrite_index_file(index_entries: list[IndexEntry]) -> None:
     FileUtil.update_index_file(get_index_file_path(), index_entries)
 
 
-def copy_object_to_work_dir(name: str, hash: str) -> None:
+def copy_object_to_work_dir(dest_abs_path: str, hash: str) -> None:
     src_ = get_path_in_objects(hash)
-    dest_path = os.path.join(get_work_dir(), name)
-    FileUtil.copy_file(src_, dest_path)
-    return dest_path
+    FileUtil.copy_file(src_, dest_abs_path)
 
 
 def delete_work_dir_file(rel_path: str) -> None:
@@ -224,3 +214,12 @@ def find_by_path(entries: list[IndexEntry], path: str) -> IndexEntry:
         if entry.path == path:
             return entry
     return None
+
+
+def flat_tree_to_index(flat_head_tree: list[dict[str, str]]) -> list[IndexEntry]:
+    next_index_entries = []
+    for blob in flat_head_tree:
+        dest_abs_path = convert_file_to_work_dir_path(blob.get("name"))
+        entry: IndexEntry = build_index_entry(dest_abs_path)
+        next_index_entries.append(entry)
+    return next_index_entries
