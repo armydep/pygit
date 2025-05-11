@@ -28,10 +28,6 @@ def init_command(args, staged):
         storage_root = get_storage_root()
         FileUtil.create_dir_if_not_exist(storage_root)
 
-        # 2 create index - empty
-        # index_file_path = get_index_file_path()
-        # FileUtil.write_lines_to_file(index_file_path, "")
-
         # 3 create refs/heads/ empty //<main branch>
         refs_heads_path = get_refs_heads_path()
         FileUtil.create_dir_if_not_exist(refs_heads_path)
